@@ -1,5 +1,5 @@
 {
-    "parent": "naturaltrees:block/branch_birch_0",
+    "parent": "naturaltrees:block/branch_birch_7",
     "display": {
         "thirdperson": {
             "rotation": [ 0, 0, 180 ],

@@ -1,5 +1,5 @@
 {
-    "parent": "naturaltrees:block/branch_spruce_0",
+    "parent": "naturaltrees:block/branch_spruce_7",
     "display": {
         "thirdperson": {
             "rotation": [ 0, 0, 180 ],
