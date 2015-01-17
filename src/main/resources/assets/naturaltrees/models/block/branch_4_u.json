@@ -4,14 +4,14 @@
   },
   "elements": [
     {   "from": [ 3, 3, 3 ],
-      "to": [ 13, 16, 13 ],
+      "to": [ 13, 19, 13 ],
       "faces": {
         "down":  { "uv": [ 3, 3, 13, 13 ], "texture": "#log" },
         "up":    { "uv": [ 3, 3, 13, 13 ], "texture": "#log" },
-        "north": { "uv": [ 3, 3, 13, 16 ], "texture": "#log" },
-        "south": { "uv": [ 3, 3, 13, 16 ], "texture": "#log" },
-        "west":  { "uv": [ 3, 3, 13, 16 ], "texture": "#log" },
-        "east":  { "uv": [ 3, 3, 13, 16 ], "texture": "#log" }
+        "north": { "uv": [ 3, 3, 13, 19 ], "texture": "#log" },
+        "south": { "uv": [ 3, 3, 13, 19 ], "texture": "#log" },
+        "west":  { "uv": [ 3, 3, 13, 19 ], "texture": "#log" },
+        "east":  { "uv": [ 3, 3, 13, 19 ], "texture": "#log" }
       },
       "__comment": "Branch"
     }

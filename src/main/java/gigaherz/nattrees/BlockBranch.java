@@ -1,6 +1,7 @@
 package gigaherz.nattrees;
 
-import net.minecraft.block.*;
+import net.minecraft.block.Block;
+import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
@@ -13,7 +14,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -33,8 +33,7 @@ public class BlockBranch
     public static final PropertyBool HAS_LEAVES = PropertyBool.create("has_leaves");
     public static final PropertyInteger THICKNESS = PropertyInteger.create("thickness", 0, 7);
 
-    public BlockBranch(Material materialIn)
-    {
+    public BlockBranch(Material materialIn) {
         super(materialIn);
         this.setDefaultState(this.blockState.getBaseState()
                 .withProperty(FACING, EnumFacing.DOWN)
@@ -55,14 +54,17 @@ public class BlockBranch
 
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
-    {
+    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side) {
         return true;
     }
 
     @Override
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
-        return worldIn.isSideSolid(pos.offset(side.getOpposite()), side, true);
+        BlockPos npos = pos.offset(side.getOpposite());
+        Block block = worldIn.getBlockState(npos).getBlock();
+        if (block instanceof BlockBranch)
+            return block.getUnlocalizedName().equals(getUnlocalizedName());
+        return worldIn.isSideSolid(npos, side, true);
     }
 
     @Override
@@ -76,22 +78,60 @@ public class BlockBranch
         return false;
     }
 
-    @Override
-    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
-        int thickness = meta&7;
-        boolean hasLeaves = (meta&8) != 0;
+    protected EnumFacing getPreferredConnectionSide(IBlockAccess worldIn, BlockPos pos, int thickness){
 
         EnumFacing face = EnumFacing.DOWN;
-        if(this.canConnectTo(worldIn, pos, EnumFacing.WEST, thickness))
+        int preference = -1;
+
+        int pref = this.getConnectionValue(worldIn, pos, EnumFacing.WEST);
+        if (pref > preference) {
             face = EnumFacing.WEST;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.EAST, thickness))
+            preference = pref;
+        }
+
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.EAST);
+        if (pref > preference) {
             face = EnumFacing.EAST;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.NORTH, thickness))
+            preference = pref;
+        }
+
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.NORTH);
+        if (pref > preference) {
             face = EnumFacing.NORTH;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.SOUTH, thickness))
+            preference = pref;
+        }
+
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.SOUTH);
+        if (pref > preference) {
             face = EnumFacing.SOUTH;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.UP, thickness))
+            preference = pref;
+        }
+
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.UP);
+        if (pref > preference) {
             face = EnumFacing.UP;
+            preference = pref;
+        }
+
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.DOWN);
+        if (pref > preference) {
+            face = EnumFacing.DOWN;
+            preference = pref;
+        }
+
+        if(preference < thickness)
+            return EnumFacing.DOWN;
+
+        return face;
+    }
+
+
+    @Override
+    public IBlockState onBlockPlaced(World worldIn, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ, int meta, EntityLivingBase placer) {
+        int thickness = meta & 7;
+        boolean hasLeaves = (meta & 8) != 0;
+
+        EnumFacing face = getPreferredConnectionSide(worldIn, pos, thickness);
 
         return this.getDefaultState()
                 .withProperty(FACING, face)
@@ -100,6 +140,9 @@ public class BlockBranch
     }
 
     private boolean canConnectTo(IBlockAccess worldIn, BlockPos thisPos, EnumFacing facing, int thickness) {
+        return canConnectTo(worldIn, thisPos, facing, thickness, false);
+    }
+    private boolean canConnectTo(IBlockAccess worldIn, BlockPos thisPos, EnumFacing facing, int thickness, boolean branchOnly) {
         BlockPos pos = thisPos.offset(facing);
 
         Block block = worldIn.getBlockState(pos).getBlock();
@@ -107,32 +150,45 @@ public class BlockBranch
             return false;
 
         if (block instanceof BlockBranch)
-            return ((BlockBranch)block).getThickness(worldIn, pos) >= thickness;
+            return block.getUnlocalizedName().equals(getUnlocalizedName())
+                    && ((BlockBranch) block).getThickness(worldIn, pos) >= thickness;
+
+        if(branchOnly)
+            return false;
 
         return block.isSideSolid(worldIn, pos, facing.getOpposite());
     }
 
+    private int getConnectionValue(IBlockAccess worldIn, BlockPos thisPos, EnumFacing facing) {
+        BlockPos pos = thisPos.offset(facing);
+
+        Block block = worldIn.getBlockState(pos).getBlock();
+        if (block == Blocks.barrier)
+            return -1;
+
+        if (block instanceof BlockBranch
+                && block.getUnlocalizedName().equals(getUnlocalizedName()))
+        {
+            return ((BlockBranch) block).getThickness(worldIn, pos);
+        }
+
+        if (block.isSideSolid(worldIn, pos, facing.getOpposite()))
+            return 0;
+
+        return -1;
+    }
+
     private int getThickness(IBlockAccess worldIn, BlockPos pos) {
         IBlockState state = worldIn.getBlockState(pos);
-        return (Integer)state.getValue(THICKNESS);
+        return (Integer) state.getValue(THICKNESS);
     }
 
     @Override
     public void onNeighborBlockChange(World worldIn, BlockPos pos, IBlockState state, Block neighborBlock) {
-        int thickness = (Integer)state.getValue(THICKNESS);
-        boolean hasLeaves = (Boolean)state.getValue(HAS_LEAVES);
+        int thickness = (Integer) state.getValue(THICKNESS);
+        boolean hasLeaves = (Boolean) state.getValue(HAS_LEAVES);
 
-        EnumFacing face = EnumFacing.DOWN;
-        if(this.canConnectTo(worldIn, pos, EnumFacing.WEST, thickness))
-            face = EnumFacing.WEST;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.EAST, thickness))
-            face = EnumFacing.EAST;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.NORTH, thickness))
-            face = EnumFacing.NORTH;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.SOUTH, thickness))
-            face = EnumFacing.SOUTH;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.UP, thickness))
-            face = EnumFacing.UP;
+        EnumFacing face = getPreferredConnectionSide(worldIn, pos, thickness);
 
         worldIn.setBlockState(pos, state
                 .withProperty(FACING, face)
@@ -143,7 +199,7 @@ public class BlockBranch
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos) {
         IBlockState state = worldIn.getBlockState(pos);
-        EnumFacing facing = (EnumFacing)state.getValue(FACING);
+        EnumFacing facing = (EnumFacing) state.getValue(FACING);
         boolean hasLeaves = (Boolean) state.getValue(HAS_LEAVES);
         int thickness = (Integer) state.getValue(THICKNESS);
 
@@ -151,25 +207,28 @@ public class BlockBranch
             thickness = 7;
 
         float width = (thickness + 1) * 2 / 16.0f;
-        float height = (thickness + 1) * 2 / 16.0f;
-        float length = (thickness + 1) * 2 / 16.0f;
 
-        float north = (1 - length)/2;
+        float north = (1 - width) / 2;
         float south = 1 - north;
         float west = (1 - width) / 2;
         float east = 1 - west;
-        float bottom = (1 - height) / 2;
-        float top = 1 - bottom;
+        float down = (1 - width) / 2;
+        float up = 1 - down;
 
-        // TODO: account for connections
+        if (facing == EnumFacing.DOWN)
+            down = -down;
+        else if (facing == EnumFacing.UP)
+            up = (1 - up) + 1;
+        else if (facing == EnumFacing.WEST)
+            west = -west;
+        else if (facing == EnumFacing.EAST)
+            east = (1 - east) + 1;
+        else if (facing == EnumFacing.NORTH)
+            north = -north;
+        else if (facing == EnumFacing.SOUTH)
+            south = (1 - south) + 1;
 
-        this.setBlockBounds(west, bottom, north, east, top, south);
-    }
-
-    @Override
-    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List list, Entity collidingEntity) {
-        // TODO: add collision boxes for connections
-        super.addCollisionBoxesToList(worldIn, pos, state, mask, list, collidingEntity);
+        this.setBlockBounds(west, down, north, east, up, south);
     }
 
     @Override
@@ -183,11 +242,8 @@ public class BlockBranch
                 // TODO: pretend break leaf block
             }
         }
-
-        BlockSapling sp;
-        BlockPotato pt;
-
-        return true;
+        ;
+        return false;
     }
 
     @Override
@@ -197,27 +253,19 @@ public class BlockBranch
 
     @Override
     public IBlockState getActualState(IBlockState state, IBlockAccess worldIn, BlockPos pos) {
-        int thickness = (Integer)state.getValue(THICKNESS);
+        int thickness = (Integer) state.getValue(THICKNESS);
 
-        EnumFacing face = EnumFacing.DOWN;
-        if(this.canConnectTo(worldIn, pos, EnumFacing.WEST, thickness))
-            face = EnumFacing.WEST;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.EAST, thickness))
-            face = EnumFacing.EAST;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.NORTH, thickness))
-            face = EnumFacing.NORTH;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.SOUTH, thickness))
-            face = EnumFacing.SOUTH;
-        else if(this.canConnectTo(worldIn, pos, EnumFacing.UP, thickness))
-            face = EnumFacing.UP;
+        EnumFacing face = getPreferredConnectionSide(worldIn, pos, thickness);
 
-        return state.withProperty(FACING, face);
+        state = state.withProperty(FACING, face);
+
+        return state;
     }
 
     @Override
     public int getMetaFromState(IBlockState state) {
 
-        int i = (Integer)state.getValue(THICKNESS);
+        int i = (Integer) state.getValue(THICKNESS);
 
         if ((Boolean) state.getValue(HAS_LEAVES)) {
             i |= 8;
@@ -243,6 +291,6 @@ public class BlockBranch
 
     @Override
     public void grow(World worldIn, Random rand, BlockPos pos, IBlockState state) {
-        worldIn.setBlockState(pos, state.withProperty(THICKNESS, getThickness(worldIn,pos) + 1), 2);
+        worldIn.setBlockState(pos, state.withProperty(THICKNESS, getThickness(worldIn, pos) + 1), 3);
     }
 }

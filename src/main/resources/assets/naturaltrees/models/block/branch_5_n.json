@@ -3,15 +3,15 @@
     "particle": "#log"
   },
   "elements": [
-    {   "from": [ 2, 2, 2 ],
-      "to": [ 14, 14, 16 ],
+    {   "from": [ 2, 2, -2 ],
+      "to": [ 14, 14, 14 ],
       "faces": {
-        "down":  { "uv": [ 2, 2, 14, 16 ], "texture": "#log" },
-        "up":    { "uv": [ 2, 2, 14, 16 ], "texture": "#log" },
+        "down":  { "uv": [ 2, -2, 14, 14 ], "texture": "#log" },
+        "up":    { "uv": [ 2, -2, 14, 14 ], "texture": "#log" },
         "north": { "uv": [ 2, 2, 14, 14 ], "texture": "#log" },
         "south": { "uv": [ 2, 2, 14, 14 ], "texture": "#log" },
-        "west":  { "uv": [ 2, 2, 16, 14 ], "texture": "#log" },
-        "east":  { "uv": [ 2, 2, 16, 14 ], "texture": "#log" }
+        "west":  { "uv": [ -2, 2, 14, 14 ], "texture": "#log" },
+        "east":  { "uv": [ -2, 2, 14, 14 ], "texture": "#log" }
       },
       "__comment": "Branch"
     }

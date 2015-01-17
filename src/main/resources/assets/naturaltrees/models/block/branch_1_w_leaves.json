@@ -3,13 +3,13 @@
     "particle": "#log"
   },
   "elements": [
-    {   "from": [ 0, 6, 6 ],
+    {   "from": [ -6, 6, 6 ],
       "to": [ 10, 10, 10 ],
       "faces": {
-        "down":  { "uv": [ 0, 6, 10, 10 ], "texture": "#log" },
-        "up":    { "uv": [ 0, 6, 10, 10 ], "texture": "#log" },
-        "north": { "uv": [ 0, 6, 10, 10 ], "texture": "#log" },
-        "south": { "uv": [ 0, 6, 10, 10 ], "texture": "#log" },
+        "down":  { "uv": [ -6, 6, 10, 10 ], "texture": "#log" },
+        "up":    { "uv": [ -6, 6, 10, 10 ], "texture": "#log" },
+        "north": { "uv": [ -6, 6, 10, 10 ], "texture": "#log" },
+        "south": { "uv": [ -6, 6, 10, 10 ], "texture": "#log" },
         "west":  { "uv": [ 6, 6, 10, 10 ], "texture": "#log" },
         "east":  { "uv": [ 6, 6, 10, 10 ], "texture": "#log" }
       },

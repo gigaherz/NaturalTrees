@@ -22,13 +22,16 @@ public class ClientProxy extends CommonProxy {
     public void registerBlockTexture(final Block block, final String blockName) {
         registerBlockTexture(block, 0, blockName);
     }
+
     public void registerBlockTexture(final Block block, int meta, final String blockName) {
         RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
         renderItem.getItemModelMesher().register(Item.getItemFromBlock(block), meta, new ModelResourceLocation(NaturalTrees.MODID + ":" + blockName, "inventory"));
     }
+
     public void registerItemTexture(final Item item, final String itemName) {
         registerItemTexture(item, 0, itemName);
     }
+
     public void registerItemTexture(final Item item, int meta, final String itemName) {
         RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
         renderItem.getItemModelMesher().register(item, meta, new ModelResourceLocation(NaturalTrees.MODID + ":" + itemName, "inventory"));
