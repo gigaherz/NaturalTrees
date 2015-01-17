@@ -33,10 +33,23 @@ public class NaturalTrees {
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
 
-        branchOak = new BlockBranch(Material.wood).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branchOak");
-        GameRegistry.registerBlock(branchOak, "branchOak");
+        branchOak = new BlockBranch(Material.wood).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_oak");
+        GameRegistry.registerBlock(branchOak, "branch_oak");
 
-        GameRegistry.registerTileEntity(TileBranch.class, "branchTile");
+        branchBirch = new BlockBranch(Material.wood).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_birch");
+        GameRegistry.registerBlock(branchBirch, "branch_birch");
+
+        branchSpruce = new BlockBranch(Material.wood).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_spruce");
+        GameRegistry.registerBlock(branchSpruce, "branch_spruce");
+
+        branchJungle = new BlockBranch(Material.wood).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_jungle");
+        GameRegistry.registerBlock(branchJungle, "branch_jungle");
+
+        branchDarkOak = new BlockBranch(Material.wood).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_dark_oak");
+        GameRegistry.registerBlock(branchDarkOak, "branch_dark_oak");
+
+        branchAcacia = new BlockBranch(Material.wood).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_acacia");
+        GameRegistry.registerBlock(branchAcacia, "branch_acacia");
 
         proxy.registerPreRenderers();
     }

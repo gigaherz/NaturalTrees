@@ -1,0 +1,19 @@
+{
+  "textures": {
+    "particle": "#log"
+  },
+  "elements": [
+    {   "from": [ 5, 5, 5 ],
+      "to": [ 16, 11, 11 ],
+      "faces": {
+        "down":  { "uv": [ 5, 5, 16, 11 ], "texture": "#log" },
+        "up":    { "uv": [ 5, 5, 16, 11 ], "texture": "#log" },
+        "north": { "uv": [ 5, 5, 16, 11 ], "texture": "#log" },
+        "south": { "uv": [ 5, 5, 16, 11 ], "texture": "#log" },
+        "west":  { "uv": [ 5, 5, 11, 11 ], "texture": "#log" },
+        "east":  { "uv": [ 5, 5, 11, 11 ], "texture": "#log" }
+      },
+      "__comment": "Branch"
+    }
+  ]
+}

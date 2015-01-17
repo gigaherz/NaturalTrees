@@ -1,0 +1,6 @@
+{
+    "parent": "naturaltrees:block/branch_0_u",
+    "textures": {
+        "log": "minecraft:blocks/log_oak"
+    }
+}

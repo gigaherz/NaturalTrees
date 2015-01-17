@@ -1,0 +1,6 @@
+{
+    "parent": "naturaltrees:block/branch_4_w",
+    "textures": {
+        "log": "minecraft:blocks/log_acacia"
+    }
+}

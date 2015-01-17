@@ -1,0 +1,6 @@
+{
+    "parent": "naturaltrees:block/branch_1_d",
+    "textures": {
+        "log": "minecraft:blocks/log_spruce"
+    }
+}

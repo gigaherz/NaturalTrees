@@ -11,7 +11,6 @@ import net.minecraft.item.Item;
 
 public class ClientProxy extends CommonProxy {
 
-    // Client stuff
     public void registerPreRenderers() {
     }
 
