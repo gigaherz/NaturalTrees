@@ -4,18 +4,30 @@
   },
   "elements": [
     {   "from": [ 2, 2, 2 ],
-      "to": [ 14, 14, 18 ],
+      "to": [ 14, 14, 16 ],
       "faces": {
-        "down":  { "uv": [ 2, 2, 14, 18 ], "texture": "#log" },
-        "up":    { "uv": [ 2, 2, 14, 18 ], "texture": "#log" },
+        "down":  { "uv": [ 2, 2, 14, 16 ], "texture": "#log" },
+        "up":    { "uv": [ 2, 2, 14, 16 ], "texture": "#log" },
         "north": { "uv": [ 2, 2, 14, 14 ], "texture": "#log" },
         "south": { "uv": [ 2, 2, 14, 14 ], "texture": "#log" },
-        "west":  { "uv": [ 2, 2, 18, 14 ], "texture": "#log" },
-        "east":  { "uv": [ 2, 2, 18, 14 ], "texture": "#log" }
+        "west":  { "uv": [ 2, 2, 16, 14 ], "texture": "#log" },
+        "east":  { "uv": [ 2, 2, 16, 14 ], "texture": "#log" }
       },
       "__comment": "Branch"
-    },
-    {   "from": [ 0, 0, 0 ],
+    }
+,   {   "from": [ 2, 2, 16 ],
+      "to": [ 14, 14, 18 ],
+      "faces": {
+        "down":  { "uv": [ 2, 0, 14, 2 ], "texture": "#log" },
+        "up":    { "uv": [ 2, 0, 14, 2 ], "texture": "#log" },
+        "north": { "uv": [ 2, 2, 14, 14 ], "texture": "#log" },
+        "south": { "uv": [ 2, 2, 14, 14 ], "texture": "#log" },
+        "west":  { "uv": [ 0, 2, 2, 14 ], "texture": "#log" },
+        "east":  { "uv": [ 0, 2, 2, 14 ], "texture": "#log" }
+      },
+      "__comment": "Branch Extension"
+    }
+,   {   "from": [ 0, 0, 0 ],
         "to": [ 16, 16, 16 ],
         "faces": {
             "down":  { "uv": [ 0, 0, 16, 16 ], "texture": "#leaf", "tintindex": 0 },
