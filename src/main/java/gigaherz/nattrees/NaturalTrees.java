@@ -2,6 +2,7 @@ package gigaherz.nattrees;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockFence;
+import net.minecraft.block.BlockGlass;
 import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.material.Material;
 import net.minecraftforge.fml.common.Mod;
@@ -46,11 +47,13 @@ public class NaturalTrees {
         branchJungle = new BlockBranch(Material.wood, BlockBranch.Variant.JUNGLE).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_jungle");
         GameRegistry.registerBlock(branchJungle, "branch_jungle");
 
-        branchDarkOak = new BlockBranch(Material.wood, BlockBranch.Variant.DARK_ORAK).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_dark_oak");
+        branchDarkOak = new BlockBranch(Material.wood, BlockBranch.Variant.DARK_OAK).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_dark_oak");
         GameRegistry.registerBlock(branchDarkOak, "branch_dark_oak");
 
         branchAcacia = new BlockBranch(Material.wood, BlockBranch.Variant.ACACIA).setHardness(1).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_acacia");
         GameRegistry.registerBlock(branchAcacia, "branch_acacia");
+
+        BlockGlass g;
 
         proxy.registerPreRenderers();
     }
