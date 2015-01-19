@@ -32,6 +32,12 @@ public class BlockBranch
         extends Block
         implements IGrowable {
 
+    public static int getMetaFromProperties(int thickness, boolean leaves) {
+        if (leaves)
+            thickness |= 8;
+        return thickness;
+    }
+
     public enum Variant {
         OAK,
         BIRCH,
@@ -60,6 +66,7 @@ public class BlockBranch
                 .withProperty(THICKNESS, 0));
         this.setCreativeTab(CreativeTabs.tabDecorations);
         this.setLightOpacity(1);
+        this.setHardness(4);
     }
 
     @SideOnly(Side.CLIENT)
@@ -111,6 +118,11 @@ public class BlockBranch
     }
 
     @Override
+    public float getBlockHardness(World worldIn, BlockPos pos) {
+        return this.blockHardness * (getThickness(worldIn,pos)+1) / 8.0f;
+    }
+
+    @Override
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
         BlockPos npos = pos.offset(side.getOpposite());
         Block block = worldIn.getBlockState(npos).getBlock();
@@ -134,8 +146,21 @@ public class BlockBranch
 
         EnumFacing face = EnumFacing.DOWN;
         int preference = -1;
+        int pref;
 
-        int pref = this.getConnectionValue(worldIn, pos, EnumFacing.WEST, thickness*2+1);
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.DOWN, thickness*2+1);
+        if (pref > preference) {
+            face = EnumFacing.DOWN;
+            preference = pref;
+        }
+
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.UP, thickness*2+1);
+        if (pref > preference) {
+            face = EnumFacing.UP;
+            preference = pref;
+        }
+
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.WEST, thickness*2+1);
         if (pref > preference) {
             face = EnumFacing.WEST;
             preference = pref;
@@ -156,18 +181,6 @@ public class BlockBranch
         pref = this.getConnectionValue(worldIn, pos, EnumFacing.SOUTH, thickness*2+1);
         if (pref > preference) {
             face = EnumFacing.SOUTH;
-            preference = pref;
-        }
-
-        pref = this.getConnectionValue(worldIn, pos, EnumFacing.UP, thickness*2+1);
-        if (pref > preference) {
-            face = EnumFacing.UP;
-            preference = pref;
-        }
-
-        pref = this.getConnectionValue(worldIn, pos, EnumFacing.DOWN, thickness*2+1);
-        if (pref > preference) {
-            face = EnumFacing.DOWN;
             preference = pref;
         }
 

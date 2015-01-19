@@ -23,6 +23,8 @@ public class ClientProxy extends CommonProxy {
         registerBlockTexture(NaturalTrees.branchJungle, "branch_jungle");
         registerBlockTexture(NaturalTrees.branchDarkOak, "branch_dark_oak");
         registerBlockTexture(NaturalTrees.branchAcacia, "branch_acacia");
+
+        registerItemTexture(NaturalTrees.saplingOak, "branch_oak_sapling");
     }
 
     public void registerBlockTexture(final Block block, final String blockName) {
