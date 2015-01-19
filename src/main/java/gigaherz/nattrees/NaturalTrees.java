@@ -1,17 +1,24 @@
 package gigaherz.nattrees;
 
+import gigaherz.nattrees.generators.BirchTreeGenerator;
 import gigaherz.nattrees.generators.OakTreeGenerator;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockFence;
-import net.minecraft.block.BlockGlass;
-import net.minecraft.block.BlockNewLeaf;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.world.biome.BiomeDecorator;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
+import net.minecraftforge.event.terraingen.OreGenEvent;
+import net.minecraftforge.event.terraingen.SaplingGrowTreeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 
 
@@ -29,6 +36,7 @@ public class NaturalTrees {
     public static Block branchAcacia;
 
     public static Item saplingOak;
+    public static Item saplingBirch;
 
     @Mod.Instance(value = NaturalTrees.MODID)
     public static NaturalTrees instance;
@@ -38,6 +46,8 @@ public class NaturalTrees {
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+
+        MinecraftForge.TERRAIN_GEN_BUS.register(this);
 
         branchOak = new BlockBranch(Material.wood, BlockBranch.Variant.OAK).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_oak");
         GameRegistry.registerBlock(branchOak, "branch_oak");
@@ -57,8 +67,11 @@ public class NaturalTrees {
         branchAcacia = new BlockBranch(Material.wood, BlockBranch.Variant.ACACIA).setStepSound(Block.soundTypeWood).setUnlocalizedName("branch_acacia");
         GameRegistry.registerBlock(branchAcacia, "branch_acacia");
 
-        saplingOak = new ItemNewSapling(branchOak, new OakTreeGenerator()).setUnlocalizedName("branch_oak_sapling");
+        saplingOak = new ItemNewSapling(branchOak, new OakTreeGenerator()).setUnlocalizedName("branch_birch_sapling");
         GameRegistry.registerItem(saplingOak, "branch_oak_sapling");
+
+        saplingBirch = new ItemNewSapling(branchBirch, new BirchTreeGenerator()).setUnlocalizedName("branch_birch_sapling");
+        GameRegistry.registerItem(saplingBirch, "branch_birch_sapling");
 
         proxy.registerPreRenderers();
     }
@@ -68,5 +81,29 @@ public class NaturalTrees {
         proxy.registerRenderers();
 
         BlockFence f;
+    }
+
+    @SubscribeEvent
+    public void onDecorateBiome(DecorateBiomeEvent.Decorate ev) {
+        if (ev.type == DecorateBiomeEvent.Decorate.EventType.TREE) {
+            ev.setResult(Event.Result.DENY);
+            new OakTreeGenerator().generateTreeAt(ev.world, ev.pos, ev.rand);
+        }
+    }
+
+    @SubscribeEvent
+    public void onSaplingGrow(SaplingGrowTreeEvent ev) {
+        IBlockState state = ev.world.getBlockState(ev.pos);
+        Block block = state.getBlock();
+        if(block == Blocks.sapling) {
+            BlockPlanks.EnumType type = (BlockPlanks.EnumType) state.getValue(BlockSapling.TYPE);
+
+            switch(type) {
+                case OAK :
+                    ev.setResult(Event.Result.DENY);
+                    new OakTreeGenerator().generateTreeAt(ev.world, ev.pos, ev.rand);
+                    break;
+            }
+        }
     }
 }

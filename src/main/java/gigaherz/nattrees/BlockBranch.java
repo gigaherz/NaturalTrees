@@ -197,10 +197,11 @@ public class BlockBranch
         if (block == Blocks.barrier)
             return -1;
 
-        if (block instanceof BlockBranch
-                && block.getUnlocalizedName().equals(getUnlocalizedName()))
+        if (block instanceof BlockBranch)
         {
-            return ((BlockBranch) block).getThickness(worldIn, pos) * 2;
+            if (block.getUnlocalizedName().equals(getUnlocalizedName()))
+                return ((BlockBranch) block).getThickness(worldIn, pos) * 2;
+            else return -1;
         }
 
         if (block.isSideSolid(worldIn, pos, facing.getOpposite()))
