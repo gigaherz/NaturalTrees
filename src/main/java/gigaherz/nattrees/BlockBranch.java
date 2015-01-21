@@ -1,7 +1,6 @@
 package gigaherz.nattrees;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockFence;
 import net.minecraft.block.BlockLeavesBase;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.material.Material;
@@ -54,10 +53,10 @@ public class BlockBranch
     public static final PropertyBool HAS_LEAVES = PropertyBool.create("has_leaves");
     public static final PropertyInteger THICKNESS = PropertyInteger.create("thickness", 0, 7);
 
-    Variant variant;
-    boolean variantCanHaveLeaves = true;
+    final Variant variant;
+    final boolean variantCanHaveLeaves = true;
 
-    public BlockBranch(Material materialIn, Variant variant) {
+    public BlockBranch(Material materialIn, Variant variant, String unlocName) {
         super(materialIn);
         this.variant = variant;
         this.setDefaultState(this.blockState.getBaseState()
@@ -67,19 +66,18 @@ public class BlockBranch
         this.setCreativeTab(CreativeTabs.tabDecorations);
         this.setLightOpacity(1);
         this.setHardness(4);
+        this.setStepSound(Block.soundTypeWood);
+        this.setUnlocalizedName(unlocName);
     }
 
     @SideOnly(Side.CLIENT)
-    public int getBlockColor()
-    {
+    public int getBlockColor() {
         return ColorizerFoliage.getFoliageColor(0.5D, 1.0D);
     }
 
     @SideOnly(Side.CLIENT)
-    public int getRenderColor(IBlockState state)
-    {
-        switch(variant)
-        {
+    public int getRenderColor(IBlockState state) {
+        switch (variant) {
             case BIRCH:
                 return ColorizerFoliage.getFoliageColorBirch();
             case SPRUCE:
@@ -89,20 +87,17 @@ public class BlockBranch
     }
 
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
-    {
+    public EnumWorldBlockLayer getBlockLayer() {
         return EnumWorldBlockLayer.CUTOUT_MIPPED;
     }
 
     @SideOnly(Side.CLIENT)
-    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
-    {
+    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass) {
         return BiomeColorHelper.getFoliageColorAtPos(worldIn, pos);
     }
 
     @Override
-    public boolean isOpaqueCube()
-    {
+    public boolean isOpaqueCube() {
         return false;
     }
 
@@ -119,15 +114,20 @@ public class BlockBranch
 
     @Override
     public float getBlockHardness(World worldIn, BlockPos pos) {
-        return this.blockHardness * (getThickness(worldIn,pos)+1) / 8.0f;
+        return this.blockHardness * (getThickness(worldIn, pos) + 1) / 8.0f;
     }
 
     @Override
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
         BlockPos npos = pos.offset(side.getOpposite());
         Block block = worldIn.getBlockState(npos).getBlock();
-        if (block instanceof BlockBranch)
+        if (block instanceof BlockBranch) {
             return block.getUnlocalizedName().equals(getUnlocalizedName());
+        }
+        if (side != EnumFacing.UP)
+            return false;
+        if (block != Blocks.dirt && block != Blocks.grass)
+            return false;
         return worldIn.isSideSolid(npos, side, true);
     }
 
@@ -142,49 +142,49 @@ public class BlockBranch
         return false;
     }
 
-    protected EnumFacing getPreferredConnectionSide(IBlockAccess worldIn, BlockPos pos, int thickness){
+    protected EnumFacing getPreferredConnectionSide(IBlockAccess worldIn, BlockPos pos, int thickness) {
 
         EnumFacing face = EnumFacing.DOWN;
         int preference = -1;
         int pref;
 
-        pref = this.getConnectionValue(worldIn, pos, EnumFacing.DOWN, thickness*2+1);
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.DOWN, thickness * 2 + 1);
         if (pref > preference) {
             face = EnumFacing.DOWN;
             preference = pref;
         }
 
-        pref = this.getConnectionValue(worldIn, pos, EnumFacing.UP, thickness*2+1);
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.UP, thickness * 2 + 1);
         if (pref > preference) {
             face = EnumFacing.UP;
             preference = pref;
         }
 
-        pref = this.getConnectionValue(worldIn, pos, EnumFacing.WEST, thickness*2+1);
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.WEST, thickness * 2 + 1);
         if (pref > preference) {
             face = EnumFacing.WEST;
             preference = pref;
         }
 
-        pref = this.getConnectionValue(worldIn, pos, EnumFacing.EAST, thickness*2+1);
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.EAST, thickness * 2 + 1);
         if (pref > preference) {
             face = EnumFacing.EAST;
             preference = pref;
         }
 
-        pref = this.getConnectionValue(worldIn, pos, EnumFacing.NORTH, thickness*2+1);
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.NORTH, thickness * 2 + 1);
         if (pref > preference) {
             face = EnumFacing.NORTH;
             preference = pref;
         }
 
-        pref = this.getConnectionValue(worldIn, pos, EnumFacing.SOUTH, thickness*2+1);
+        pref = this.getConnectionValue(worldIn, pos, EnumFacing.SOUTH, thickness * 2 + 1);
         if (pref > preference) {
             face = EnumFacing.SOUTH;
             preference = pref;
         }
 
-        if(preference < thickness * 2)
+        if (preference < thickness * 2)
             return EnumFacing.DOWN;
 
         return face;
@@ -197,8 +197,7 @@ public class BlockBranch
         if (block == Blocks.barrier)
             return -1;
 
-        if (block instanceof BlockBranch)
-        {
+        if (block instanceof BlockBranch) {
             if (block.getUnlocalizedName().equals(getUnlocalizedName()))
                 return ((BlockBranch) block).getThickness(worldIn, pos) * 2;
             else return -1;
@@ -295,7 +294,7 @@ public class BlockBranch
         if (!variantCanHaveLeaves)
             return false;
 
-        return (Integer)state.getValue(THICKNESS) < 7;
+        return (Integer) state.getValue(THICKNESS) < 7;
     }
 
     @Override
@@ -330,9 +329,15 @@ public class BlockBranch
         return new BlockState(this, FACING, HAS_LEAVES, THICKNESS);
     }
 
-    private int getThickness(IBlockAccess worldIn, BlockPos pos) {
+    public int getThickness(IBlockAccess worldIn, BlockPos pos) {
         IBlockState state = worldIn.getBlockState(pos);
         return (Integer) state.getValue(THICKNESS);
+    }
+
+
+    public boolean getHasLeaves(World worldIn, BlockPos pos) {
+        IBlockState state = worldIn.getBlockState(pos);
+        return (Boolean) state.getValue(HAS_LEAVES);
     }
 
     @Override

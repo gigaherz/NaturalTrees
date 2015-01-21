@@ -15,8 +15,7 @@ public class ClientProxy extends CommonProxy {
     }
 
     @Override
-    public void registerRenderers()
-    {
+    public void registerRenderers() {
         registerBlockTexture(NaturalTrees.branchOak, "branch_oak");
         registerBlockTexture(NaturalTrees.branchBirch, "branch_birch");
         registerBlockTexture(NaturalTrees.branchSpruce, "branch_spruce");
@@ -24,7 +23,6 @@ public class ClientProxy extends CommonProxy {
         registerBlockTexture(NaturalTrees.branchDarkOak, "branch_dark_oak");
         registerBlockTexture(NaturalTrees.branchAcacia, "branch_acacia");
 
-        registerItemTexture(NaturalTrees.saplingOak, "branch_oak_sapling");
     }
 
     public void registerBlockTexture(final Block block, final String blockName) {

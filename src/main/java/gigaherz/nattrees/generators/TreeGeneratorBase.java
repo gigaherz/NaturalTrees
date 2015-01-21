@@ -1,23 +1,20 @@
 package gigaherz.nattrees.generators;
 
 import gigaherz.nattrees.BlockBranch;
-import gigaherz.nattrees.NaturalTrees;
 import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
-import scala.reflect.internal.TreeGen;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
+import javax.annotation.Nonnull;
+import java.util.*;
 
 public abstract class TreeGeneratorBase {
 
-    Block whichBranch;
+    final Block whichBranch;
 
-    protected TreeGeneratorBase(Block which) {
+    protected TreeGeneratorBase(@Nonnull Block which) {
         whichBranch = which;
     }
 
@@ -34,9 +31,9 @@ public abstract class TreeGeneratorBase {
         testFacing(worldIn, pos, newFacings, EnumFacing.SOUTH);
 
         int c = newFacings.size();
-        for(int i=c-1; i>0; i--) {
-            int j = rand.nextInt(i+1);
-            if(j != i) {
+        for (int i = c - 1; i > 0; i--) {
+            int j = rand.nextInt(i + 1);
+            if (j != i) {
                 EnumFacing t = newFacings.get(i);
                 newFacings.set(i, newFacings.get(j));
                 newFacings.set(j, t);
@@ -51,12 +48,12 @@ public abstract class TreeGeneratorBase {
             newFacings.add(testFacing);
     }
 
-    protected boolean placeBranch(World worldIn, BlockPos pos, int thickness, EnumFacing facing, boolean leaves) {
-        if (!worldIn.canBlockBePlaced(whichBranch, pos, false, facing, null, null))
+    protected boolean placeBranch(World worldIn, BranchInfo info, boolean leaves) {
+        if (!worldIn.canBlockBePlaced(whichBranch, info.pos, false, info.facing, null, null))
             return false;
 
-        int meta = BlockBranch.getMetaFromProperties(thickness, leaves);
-        worldIn.setBlockState(pos, whichBranch.onBlockPlaced(worldIn, pos, facing, pos.getX(), pos.getY(), pos.getZ(), meta, null));
+        int meta = BlockBranch.getMetaFromProperties(info.thickness, leaves);
+        worldIn.setBlockState(info.pos, whichBranch.onBlockPlaced(worldIn, info.pos, info.facing, info.pos.getX(), info.pos.getY(), info.pos.getZ(), meta, null));
         return true;
     }
 
@@ -74,7 +71,54 @@ public abstract class TreeGeneratorBase {
             pending.add(new BranchInfo(pos, facing, thickness, length + 1));
     }
 
-    public abstract void generateTreeAt(World worldIn, BlockPos pos, Random rand);
+    public abstract boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand);
+
+    protected boolean processQueue(World worldIn, Random rand, BranchInfo initial, int tallness, double spreadness, BlockPos centerPos) {
+        Queue<BranchInfo> pending = new ArrayDeque<BranchInfo>();
+
+        int placed = 0;
+
+        pending.add(initial);
+        while (pending.size() > 0) {
+            BranchInfo info = pending.remove();
+
+            boolean leaves = getWillHaveLeaves(info);
+
+            if (!placeBranch(worldIn, info, leaves))
+                continue;
+
+            placed++;
+
+            BlockPos pos = info.pos;
+            EnumFacing facing = info.facing;
+            int thickness = info.thickness;
+            int length = info.length;
+            List<EnumFacing> newFacings = findValidGrowthDirections(worldIn, pos, rand);
+            for (EnumFacing newFacing : newFacings) {
+
+                if (shouldSkipFacing(length, tallness, facing, newFacing)) continue;
+
+
+                int thick = getRandomThicknessForFacing(pos, facing, rand, newFacing, thickness, length, tallness, spreadness, centerPos);
+
+                if (thick > thickness)
+                    thick = thickness;
+
+                if (thick >= 0) {
+                    BlockPos newPos = pos.offset(newFacing);
+
+                    addBranchToPending(pending, newPos, newFacing, length, thick);
+                }
+            }
+        }
+        return placed > 0;
+    }
+
+    protected abstract boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing);
+
+    protected abstract boolean getWillHaveLeaves(BranchInfo info);
+
+    protected abstract int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos);
 
     protected double computeDistanceFromCenter(BlockPos centerPos, BlockPos pos) {
         double X0 = centerPos.getX();
@@ -84,13 +128,42 @@ public abstract class TreeGeneratorBase {
         double Y1 = pos.getY();
         double Z1 = pos.getZ();
 
-        double dx = (X1-X0) * 1.0;
-        double dy = (Y1-Y0) * 1.0;
-        double dz = (Z1-Z0) * 1.0;
+        double dx = (X1 - X0) * 1.0;
+        double dy = (Y1 - Y0) * 1.0;
+        double dz = (Z1 - Z0) * 1.0;
 
-        double dd = (dx*dx+dy*dy+dz*dz);
+        double dd = (dx * dx + dy * dy + dz * dz);
 
         return Math.sqrt(dd);
+    }
+
+    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, EnumFacing side) {
+        BlockPos npos = pos.offset(side.getOpposite());
+        Block block = worldIn.getBlockState(npos).getBlock();
+        if (block instanceof BlockBranch) {
+            return block.getUnlocalizedName().equals(whichBranch.getUnlocalizedName()) &&
+                    ((BlockBranch) block).getThickness(worldIn, npos) > 0 &&
+                    !((BlockBranch) block).getHasLeaves(worldIn, npos);
+        }
+        if (side != EnumFacing.UP)
+            return false;
+        if (block != Blocks.dirt && block != Blocks.grass)
+            return false;
+        return worldIn.isSideSolid(npos, side, true);
+    }
+
+    public boolean canSpawnTreeAt(World worldIn, BlockPos pos) {
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (canPlaceBlockOnSide(worldIn, pos, facing)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public TreeGeneratorBase combineWith(TreeGeneratorBase other, float chanceAlternative) {
+        return new RandomTreeGenerator(this, other, chanceAlternative);
     }
 
     protected class BranchInfo {
