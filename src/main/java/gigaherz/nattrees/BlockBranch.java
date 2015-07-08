@@ -291,10 +291,7 @@ public class BlockBranch
         if (state == null)
             state = worldIn.getBlockState(pos);
 
-        if (!variantCanHaveLeaves)
-            return false;
-
-        return (Integer) state.getValue(THICKNESS) < 7;
+        return variantCanHaveLeaves && (Integer) state.getValue(THICKNESS) < 7;
     }
 
     @Override
@@ -331,6 +328,8 @@ public class BlockBranch
 
     public int getThickness(IBlockAccess worldIn, BlockPos pos) {
         IBlockState state = worldIn.getBlockState(pos);
+        if(state.getBlock() != this)
+            return 0;
         return (Integer) state.getValue(THICKNESS);
     }
 

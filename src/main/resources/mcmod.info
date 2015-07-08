@@ -1,14 +1,14 @@
 [
 {
-  "modid": "SignButton",
-  "name": "SignButton",
-  "description": "Adds a clickable redstone sign",
+  "modid": "nattrees",
+  "name": "Natural Trees",
+  "description": "A Better way to make Trees.",
   "version": "${version}",
   "mcversion": "${mcversion}",
-  "url": "https://github.com/gigaherz/ElementsOfPower",
+  "url": "https://github.com/gigaherz/NaturalTrees",
   "updateUrl": "",
   "authorList": ["gigaherz"],
-  "credits": "",
+  "credits": "The Forge and FML guys, for their awesome job",
   "logoFile": "",
   "screenshots": [],
   "dependencies": []
