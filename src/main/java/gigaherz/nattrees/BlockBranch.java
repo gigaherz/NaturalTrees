@@ -10,15 +10,13 @@ import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumWorldBlockLayer;
-import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.*;
 import net.minecraft.world.ColorizerFoliage;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -26,6 +24,7 @@ import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
+import java.util.List;
 import java.util.Random;
 
 public class BlockBranch
@@ -277,39 +276,81 @@ public class BlockBranch
     public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
     {
         IBlockState state = worldIn.getBlockState(pos);
+        AxisAlignedBB aabb = getBB(0, 0, 0, state);
+        setBlockBounds(
+                (float)aabb.minX,
+                (float)aabb.minY,
+                (float)aabb.minZ,
+                (float)aabb.maxX,
+                (float)aabb.maxY,
+                (float)aabb.maxZ);
+    }
 
-        state = getActualState(state, worldIn, pos);
+    @Override
+    public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
+    {
+        IBlockState state = getActualState(worldIn.getBlockState(pos), worldIn, pos);
+        return getBB(pos.getX(), pos.getY(), pos.getZ(), state);
+    }
 
-        EnumFacing facing = state.getValue(FACING);
+    @Override
+    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    {
+        return getBB(pos.getX(), pos.getY(), pos.getZ(), state);
+    }
+
+    @Override
+    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+    {
+        AxisAlignedBB aabb = getBB(pos.getX(), pos.getY(), pos.getZ(), state);
+
+        if (aabb != null && mask.intersectsWith(aabb))
+        {
+            list.add(aabb);
+        }
+    }
+
+    public AxisAlignedBB getBB(int x, int y, int z, IBlockState state)
+    {
         boolean hasLeaves = state.getValue(HAS_LEAVES);
-        int thickness = state.getValue(THICKNESS);
 
+        float west, down, north, east, up, south;
         if (hasLeaves)
-            thickness = 7;
+        {
+            west = down = north = 0;
+            east = up = south = 1;
+        }
+        else
+        {
+            EnumFacing facing = state.getValue(FACING);
+            int thickness = state.getValue(THICKNESS);
 
-        float width = (thickness + 1) * 2 / 16.0f;
+            float width = (thickness + 1) * 2 / 16.0f;
 
-        float north = (1 - width) / 2;
-        float south = 1 - north;
-        float west = (1 - width) / 2;
-        float east = 1 - west;
-        float down = (1 - width) / 2;
-        float up = 1 - down;
+            north = (1 - width) / 2;
+            south = 1 - north;
+            west = (1 - width) / 2;
+            east = 1 - west;
+            down = (1 - width) / 2;
+            up = 1 - down;
 
-        if (facing == EnumFacing.DOWN)
-            down = -down;
-        else if (facing == EnumFacing.UP)
-            up = (1 - up) + 1;
-        else if (facing == EnumFacing.WEST)
-            west = -west;
-        else if (facing == EnumFacing.EAST)
-            east = (1 - east) + 1;
-        else if (facing == EnumFacing.NORTH)
-            north = -north;
-        else if (facing == EnumFacing.SOUTH)
-            south = (1 - south) + 1;
+            if (facing == EnumFacing.DOWN)
+                down = -down;
+            else if (facing == EnumFacing.UP)
+                up = (1 - up) + 1;
+            else if (facing == EnumFacing.WEST)
+                west = -west;
+            else if (facing == EnumFacing.EAST)
+                east = (1 - east) + 1;
+            else if (facing == EnumFacing.NORTH)
+                north = -north;
+            else if (facing == EnumFacing.SOUTH)
+                south = (1 - south) + 1;
+        }
 
-        this.setBlockBounds(west, down, north, east, up, south);
+        return new AxisAlignedBB(
+                x+west, y+down, z+north,
+                x+east, y+up, z+south);
     }
 
     @Override
