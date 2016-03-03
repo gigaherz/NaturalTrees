@@ -1,14 +1,17 @@
 package gigaherz.nattrees;
 
-public class CommonProxy {
+public class CommonProxy
+{
 
     // Client stuff
-    public void registerPreRenderers() {
+    public void preInit()
+    {
         // Nothing here as this is the server side proxy
     }
 
     // Client stuff
-    public void registerRenderers() {
+    public void init()
+    {
         // Nothing here as this is the server side proxy
     }
 }

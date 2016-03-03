@@ -8,39 +8,34 @@ import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.item.Item;
+import net.minecraftforge.client.model.ModelLoader;
 
-public class ClientProxy extends CommonProxy {
-
-    public void registerPreRenderers() {
+public class ClientProxy extends CommonProxy
+{
+    public void preInit()
+    {
+        registerBlockModelAsItem(NaturalTrees.branchOak, "branch_oak");
+        registerBlockModelAsItem(NaturalTrees.branchBirch, "branch_birch");
+        registerBlockModelAsItem(NaturalTrees.branchSpruce, "branch_spruce");
+        registerBlockModelAsItem(NaturalTrees.branchJungle, "branch_jungle");
+        registerBlockModelAsItem(NaturalTrees.branchDarkOak, "branch_dark_oak");
+        registerBlockModelAsItem(NaturalTrees.branchAcacia, "branch_acacia");
     }
 
     @Override
-    public void registerRenderers() {
-        registerBlockTexture(NaturalTrees.branchOak, "branch_oak");
-        registerBlockTexture(NaturalTrees.branchBirch, "branch_birch");
-        registerBlockTexture(NaturalTrees.branchSpruce, "branch_spruce");
-        registerBlockTexture(NaturalTrees.branchJungle, "branch_jungle");
-        registerBlockTexture(NaturalTrees.branchDarkOak, "branch_dark_oak");
-        registerBlockTexture(NaturalTrees.branchAcacia, "branch_acacia");
-
+    public void init()
+    {
     }
 
-    public void registerBlockTexture(final Block block, final String blockName) {
-        registerBlockTexture(block, 0, blockName);
+    public void registerBlockModelAsItem(final Block block, final String blockName)
+    {
+        registerBlockModelAsItem(block, 0, blockName);
     }
 
-    public void registerBlockTexture(final Block block, int meta, final String blockName) {
-        RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
-        renderItem.getItemModelMesher().register(Item.getItemFromBlock(block), meta, new ModelResourceLocation(NaturalTrees.MODID + ":" + blockName, "inventory"));
+    public void registerBlockModelAsItem(final Block block, int meta, final String blockName)
+    {
+        ModelLoader.setCustomModelResourceLocation(Item.getItemFromBlock(block), meta,
+                new ModelResourceLocation(NaturalTrees.MODID + ":" + blockName, "inventory"));
     }
 
-    public void registerItemTexture(final Item item, final String itemName) {
-        registerItemTexture(item, 0, itemName);
-    }
-
-    public void registerItemTexture(final Item item, int meta, final String itemName) {
-        RenderItem renderItem = Minecraft.getMinecraft().getRenderItem();
-        renderItem.getItemModelMesher().register(item, meta, new ModelResourceLocation(NaturalTrees.MODID + ":" + itemName, "inventory"));
-        ModelBakery.addVariantName(item, NaturalTrees.MODID + ":" + itemName);
-    }
 }

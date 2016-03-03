@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.Random;
 
 public class RandomTreeGenerator
-        extends TreeGeneratorBase {
+        extends TreeGeneratorBase
+{
 
     final List<TreeGeneratorBase> gens = new ArrayList<TreeGeneratorBase>();
     final List<Float> chances = new ArrayList<Float>();
 
-    public RandomTreeGenerator(TreeGeneratorBase primary, TreeGeneratorBase other, float chanceAlternative) {
+    public RandomTreeGenerator(TreeGeneratorBase primary, TreeGeneratorBase other, float chanceAlternative)
+    {
         super(primary.whichBranch);
 
         gens.add(primary);
@@ -25,7 +27,8 @@ public class RandomTreeGenerator
     }
 
     @Override
-    public TreeGeneratorBase combineWith(TreeGeneratorBase other, float chanceAlternative) {
+    public TreeGeneratorBase combineWith(TreeGeneratorBase other, float chanceAlternative)
+    {
         // TODO: make immutable?
 
         gens.add(other);
@@ -36,15 +39,18 @@ public class RandomTreeGenerator
 
 
     @Override
-    public boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand) {
+    public boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand)
+    {
 
         float totalChance = 0;
-        for (float f : chances) totalChance += f;
+        for (float f : chances) { totalChance += f; }
 
         float choice = rand.nextFloat() * totalChance;
-        for (int i = 0; i < chances.size(); i++) {
+        for (int i = 0; i < chances.size(); i++)
+        {
             choice -= chances.get(i);
-            if (choice <= 0) {
+            if (choice <= 0)
+            {
                 return gens.get(i).generateTreeAt(worldIn, startPos, rand);
             }
         }
@@ -52,17 +58,20 @@ public class RandomTreeGenerator
     }
 
     @Override
-    protected boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing) {
+    protected boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing)
+    {
         return false;
     }
 
     @Override
-    protected boolean getWillHaveLeaves(BranchInfo info) {
+    protected boolean getWillHaveLeaves(BranchInfo info)
+    {
         return false;
     }
 
     @Override
-    protected int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos) {
+    protected int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos)
+    {
         return 0;
     }
 }

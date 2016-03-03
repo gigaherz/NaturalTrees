@@ -1,6 +1,0 @@
-{
-    "parent": "naturaltrees:block/branch_4_d",
-    "textures": {
-        "log": "minecraft:blocks/log_jungle"
-    }
-}

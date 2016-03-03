@@ -25,7 +25,8 @@ import net.minecraftforge.fml.common.registry.GameRegistry;
 
 
 @Mod(modid = NaturalTrees.MODID, name = NaturalTrees.MODNAME, version = NaturalTrees.VERSION)
-public class NaturalTrees {
+public class NaturalTrees
+{
     public static final String MODID = "NaturalTrees";
     public static final String MODNAME = "Natural Trees";
     public static final String VERSION = "1.0";
@@ -51,7 +52,8 @@ public class NaturalTrees {
     public static CommonProxy proxy;
 
     @EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
+    public void preInit(FMLPreInitializationEvent event)
+    {
 
         MinecraftForge.TERRAIN_GEN_BUS.register(this);
 
@@ -73,12 +75,13 @@ public class NaturalTrees {
         branchAcacia = new BlockBranch(Material.wood, BlockBranch.Variant.ACACIA, "branch_acacia");
         GameRegistry.registerBlock(branchAcacia, "branch_acacia");
 
-        proxy.registerPreRenderers();
+        proxy.preInit();
     }
 
     @EventHandler
-    public void init(FMLInitializationEvent event) {
-        proxy.registerRenderers();
+    public void init(FMLInitializationEvent event)
+    {
+        proxy.init();
 
         generatorOak = new OakTreeGenerator();
         generatorBirch = new BirchTreeGenerator();
@@ -89,47 +92,65 @@ public class NaturalTrees {
     }
 
     @SubscribeEvent
-    public void onDecorateBiome(DecorateBiomeEvent.Decorate ev) {
-        if (ev.type == DecorateBiomeEvent.Decorate.EventType.TREE) {
+    public void onDecorateBiome(DecorateBiomeEvent.Decorate ev)
+    {
+        if (ev.type == DecorateBiomeEvent.Decorate.EventType.TREE)
+        {
 
             BiomeGenBase gen = ev.world.getBiomeGenForCoords(ev.pos);
             BiomeDecorator decorator = gen.theBiomeDecorator;
             int i = decorator.treesPerChunk;
 
-            if (ev.rand.nextInt(10) == 0) {
+            if (ev.rand.nextInt(10) == 0)
+            {
                 ++i;
             }
 
 
             TreeGeneratorBase treeGen = null;
-            if (gen instanceof BiomeGenForest) {
+            if (gen instanceof BiomeGenForest)
+            {
                 if (gen.biomeName.equals("Roofed Forest"))
                     treeGen = generatorDarkOak;
                 else
                     treeGen = generatorOak.combineWith(generatorBirch, 0.1f);
-            } else if (gen instanceof BiomeGenJungle) {
+            }
+            else if (gen instanceof BiomeGenJungle)
+            {
                 treeGen = generatorJungle;
-            } else if (gen instanceof BiomeGenPlains) {
+            }
+            else if (gen instanceof BiomeGenPlains)
+            {
                 treeGen = generatorOak;
-            } else if (gen instanceof BiomeGenSavanna) {
+            }
+            else if (gen instanceof BiomeGenSavanna)
+            {
                 treeGen = generatorAcacia;
-            } else if (gen instanceof BiomeGenSnow) {
+            }
+            else if (gen instanceof BiomeGenSnow)
+            {
                 treeGen = generatorOak;
-            } else if (gen instanceof BiomeGenSwamp) {
+            }
+            else if (gen instanceof BiomeGenSwamp)
+            {
                 treeGen = generatorOak;
-            } else if (gen instanceof BiomeGenTaiga) {
+            }
+            else if (gen instanceof BiomeGenTaiga)
+            {
                 treeGen = generatorSpruce;
             }
 
-            if (treeGen != null) {
+            if (treeGen != null)
+            {
                 ev.setResult(Event.Result.DENY);
 
 
-                for (int j = 0; j < i; ++j) {
+                for (int j = 0; j < i; ++j)
+                {
                     int k = ev.rand.nextInt(16) + 8;
                     int l = ev.rand.nextInt(16) + 8;
 
-                    BlockPos blockpos = ev.world.getHorizon(ev.pos.add(k, 0, l));
+                    BlockPos blockpos = ev.world.getHeight(ev.pos.add(k, 0, l));
 
                     treeGen.generateTreeAt(ev.world, blockpos, ev.rand);
                 }
@@ -138,13 +159,16 @@ public class NaturalTrees {
     }
 
     @SubscribeEvent
-    public void onSaplingGrow(SaplingGrowTreeEvent ev) {
+    public void onSaplingGrow(SaplingGrowTreeEvent ev)
+    {
         IBlockState state = ev.world.getBlockState(ev.pos);
         Block block = state.getBlock();
-        if (block == Blocks.sapling) {
-            BlockPlanks.EnumType type = (BlockPlanks.EnumType) state.getValue(BlockSapling.TYPE);
+        if (block == Blocks.sapling)
+        {
+            BlockPlanks.EnumType type = state.getValue(BlockSapling.TYPE);
 
-            switch (type) {
+            switch (type)
+            {
                 case OAK:
                     ev.setResult(Event.Result.DENY);
                     new BirchTreeGenerator().generateTreeAt(ev.world, ev.pos, ev.rand);

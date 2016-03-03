@@ -7,14 +7,17 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
-public class BirchTreeGenerator extends TreeGeneratorBase {
+public class BirchTreeGenerator extends TreeGeneratorBase
+{
 
-    public BirchTreeGenerator() {
+    public BirchTreeGenerator()
+    {
         super(NaturalTrees.branchBirch);
     }
 
     @Override
-    public boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand) {
+    public boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand)
+    {
         if (!canSpawnTreeAt(worldIn, startPos))
             return false;
 
@@ -30,26 +33,32 @@ public class BirchTreeGenerator extends TreeGeneratorBase {
     }
 
     @Override
-    protected boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing) {
+    protected boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing)
+    {
         return length < tallness * 4 / 5 && newFacing != facing;
     }
 
     @Override
-    protected boolean getWillHaveLeaves(BranchInfo info) {
+    protected boolean getWillHaveLeaves(BranchInfo info)
+    {
         return info.thickness <= 1;
     }
 
     @Override
-    protected int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos) {
+    protected int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos)
+    {
         int min = -5;
         int max = thickness + 5;
 
-        if (length < tallness) {
+        if (length < tallness)
+        {
             if (newFacing == facing)
                 min = thickness;
             else
                 min = -max;
-        } else if (newFacing == EnumFacing.DOWN) {
+        }
+        else if (newFacing == EnumFacing.DOWN)
+        {
             min = -20;
             max = 1;
         }
@@ -63,7 +72,8 @@ public class BirchTreeGenerator extends TreeGeneratorBase {
         return thick;
     }
 
-    protected double computeDistanceFromCenter(BlockPos centerPos, BlockPos pos) {
+    protected double computeDistanceFromCenter(BlockPos centerPos, BlockPos pos)
+    {
         double X0 = centerPos.getX();
         double Y0 = centerPos.getY();
         double Z0 = centerPos.getZ();
@@ -79,5 +89,4 @@ public class BirchTreeGenerator extends TreeGeneratorBase {
 
         return Math.sqrt(dd);
     }
-
 }

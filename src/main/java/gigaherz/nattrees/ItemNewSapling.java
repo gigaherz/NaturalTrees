@@ -12,36 +12,47 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
-public class ItemNewSapling extends Item {
+public class ItemNewSapling extends Item
+{
 
     final Block baseBlock;
     final TreeGeneratorBase treeGen;
 
-    public ItemNewSapling(Block baseBlock, TreeGeneratorBase treeGen, String unlocName) {
+    public ItemNewSapling(Block baseBlock, TreeGeneratorBase treeGen, String unlocName)
+    {
         setCreativeTab(CreativeTabs.tabDecorations);
         this.baseBlock = baseBlock;
         this.treeGen = treeGen;
         this.setUnlocalizedName(unlocName);
     }
 
-    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
+    public boolean onItemUse(ItemStack stack, EntityPlayer playerIn, World worldIn, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ)
+    {
         pos = pos.offset(side);
 
-        if (stack.stackSize == 0) {
+        if (stack.stackSize == 0)
+        {
             return false;
-        } else if (!playerIn.canPlayerEdit(pos, side, stack)) {
+        }
+        else if (!playerIn.canPlayerEdit(pos, side, stack))
+        {
             return false;
-        } else if (!NaturalTrees.branchOak.canPlaceBlockAt(worldIn, pos)) {
+        }
+        else if (!NaturalTrees.branchOak.canPlaceBlockAt(worldIn, pos))
+        {
             return false;
-        } else if (worldIn.canBlockBePlaced(baseBlock, pos, false, side, null, stack)) {
+        }
+        else if (worldIn.canBlockBePlaced(baseBlock, pos, false, side, null, stack))
+        {
             if (worldIn.isRemote)
                 return true;
 
             treeGen.generateTreeAt(worldIn, pos, new Random());
             return true;
-        } else {
+        }
+        else
+        {
             return false;
         }
     }
-
 }

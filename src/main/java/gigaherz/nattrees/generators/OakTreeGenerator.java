@@ -7,14 +7,17 @@ import net.minecraft.world.World;
 
 import java.util.Random;
 
-public class OakTreeGenerator extends TreeGeneratorBase {
+public class OakTreeGenerator extends TreeGeneratorBase
+{
 
-    public OakTreeGenerator() {
+    public OakTreeGenerator()
+    {
         super(NaturalTrees.branchOak);
     }
 
     @Override
-    public boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand) {
+    public boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand)
+    {
         if (!canSpawnTreeAt(worldIn, startPos))
             return false;
 
@@ -29,24 +32,30 @@ public class OakTreeGenerator extends TreeGeneratorBase {
     }
 
     @Override
-    protected boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing) {
+    protected boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing)
+    {
         return length < tallness / 2 && newFacing != facing;
     }
 
     @Override
-    protected boolean getWillHaveLeaves(BranchInfo info) {
+    protected boolean getWillHaveLeaves(BranchInfo info)
+    {
         return info.length >= 4 && info.thickness <= 1;
     }
 
     @Override
-    protected int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos) {
+    protected int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos)
+    {
         int min = -1;
         int max = thickness + 2;
 
-        if (newFacing == EnumFacing.DOWN) {
+        if (newFacing == EnumFacing.DOWN)
+        {
             min = -20;
             max = 1;
-        } else if (length < tallness) {
+        }
+        else if (length < tallness)
+        {
             if (newFacing == facing)
                 min = thickness;
             else
@@ -63,7 +72,8 @@ public class OakTreeGenerator extends TreeGeneratorBase {
     }
 
     @Override
-    protected double computeDistanceFromCenter(BlockPos centerPos, BlockPos pos) {
+    protected double computeDistanceFromCenter(BlockPos centerPos, BlockPos pos)
+    {
         double X0 = centerPos.getX();
         double Y0 = centerPos.getY();
         double Z0 = centerPos.getZ();
@@ -79,5 +89,4 @@ public class OakTreeGenerator extends TreeGeneratorBase {
 
         return Math.sqrt(dd);
     }
-
 }
