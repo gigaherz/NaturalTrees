@@ -1,8 +1,8 @@
 {
     "forge_marker": 1,
     "defaults":{
-        "uvlock": true,
-        "textures": { "log": "blocks/log_jungle" }
+        "textures": { "log": "blocks/log_jungle" },
+        "transform": "forge:default-block"
     },
     "variants": {
         "has_leaves": {
@@ -10,22 +10,22 @@
             "true": { "submodel": { "leaves": { "model": "jungle_leaves" } } }
         },
         "facing": {
-            "up": { "x": 270 },
-            "down": { "x": 90 },
-            "east": { "y": 90 },
-            "west": { "y": 270 },
-            "north": { },
-            "south": { "y": 180 }
+            "up": { "x": 180 },
+            "down": { },
+            "east": { "x": 90, "y": 270 },
+            "west": { "x": 90, "y": 90 },
+            "north": { "x": 270 },
+            "south": { "x": 90 }
         },
         "thickness": {
-            "0": { "model": "naturaltrees:branch_0_n" },
-            "1": { "model": "naturaltrees:branch_1_n" },
-            "2": { "model": "naturaltrees:branch_2_n" },
-            "3": { "model": "naturaltrees:branch_3_n" },
-            "4": { "model": "naturaltrees:branch_4_n" },
-            "5": { "model": "naturaltrees:branch_5_n" },
-            "6": { "model": "naturaltrees:branch_6_n" },
-            "7": { "model": "naturaltrees:branch_7_n" }
+            "0": { "model": "naturaltrees:branch_0_d" },
+            "1": { "model": "naturaltrees:branch_1_d" },
+            "2": { "model": "naturaltrees:branch_2_d" },
+            "3": { "model": "naturaltrees:branch_3_d" },
+            "4": { "model": "naturaltrees:branch_4_d" },
+            "5": { "model": "naturaltrees:branch_5_d" },
+            "6": { "model": "naturaltrees:branch_6_d" },
+            "7": { "model": "naturaltrees:branch_7_d" }
         }
     }
 }

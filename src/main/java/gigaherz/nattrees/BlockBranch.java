@@ -58,6 +58,7 @@ public class BlockBranch
         this.setHardness(4);
         this.setStepSound(Block.soundTypeWood);
         this.setUnlocalizedName(unlocName);
+        this.setBlockBounds(0, 0, 0, 1, 1, 1);
     }
 
     @Override
@@ -69,7 +70,6 @@ public class BlockBranch
     @Override
     public int getMetaFromState(IBlockState state)
     {
-
         int i = state.getValue(THICKNESS);
 
         if (state.getValue(HAS_LEAVES))
@@ -159,7 +159,7 @@ public class BlockBranch
         Block block = worldIn.getBlockState(npos).getBlock();
         if (block instanceof BlockBranch)
         {
-            return block.getUnlocalizedName().equals(getUnlocalizedName());
+            return block == this;
         }
         if (side != EnumFacing.UP)
             return false;
@@ -264,10 +264,7 @@ public class BlockBranch
         int thickness = meta & 7;
         boolean hasLeaves = (meta & 8) != 0;
 
-        EnumFacing face = getPreferredConnectionSide(worldIn, pos, thickness);
-
         return this.getDefaultState()
-                .withProperty(FACING, face)
                 .withProperty(THICKNESS, thickness)
                 .withProperty(HAS_LEAVES, hasLeaves);
     }
@@ -289,7 +286,7 @@ public class BlockBranch
     @Override
     public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
     {
-        IBlockState state = getActualState(worldIn.getBlockState(pos), worldIn, pos);
+        IBlockState state = worldIn.getBlockState(pos);
         return getBB(pos.getX(), pos.getY(), pos.getZ(), state);
     }
 
@@ -322,7 +319,7 @@ public class BlockBranch
         }
         else
         {
-            EnumFacing facing = state.getValue(FACING);
+            //EnumFacing facing = state.getValue(FACING);
             int thickness = state.getValue(THICKNESS);
 
             float width = (thickness + 1) * 2 / 16.0f;
@@ -334,18 +331,18 @@ public class BlockBranch
             down = (1 - width) / 2;
             up = 1 - down;
 
-            if (facing == EnumFacing.DOWN)
-                down = -down;
+            /*if (facing == EnumFacing.DOWN)
+                down = 0;
             else if (facing == EnumFacing.UP)
-                up = (1 - up) + 1;
+                up = 1;
             else if (facing == EnumFacing.WEST)
-                west = -west;
+                west = 0;
             else if (facing == EnumFacing.EAST)
-                east = (1 - east) + 1;
+                east = 1;
             else if (facing == EnumFacing.NORTH)
-                north = -north;
+                north = 0;
             else if (facing == EnumFacing.SOUTH)
-                south = (1 - south) + 1;
+                south = 1;*/
         }
 
         return new AxisAlignedBB(

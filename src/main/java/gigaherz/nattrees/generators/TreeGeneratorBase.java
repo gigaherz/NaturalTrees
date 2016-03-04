@@ -60,7 +60,7 @@ public abstract class TreeGeneratorBase
             return false;
 
         int meta = BlockBranch.getMetaFromProperties(info.thickness, leaves);
-        worldIn.setBlockState(info.pos, whichBranch.onBlockPlaced(worldIn, info.pos, info.facing, info.pos.getX(), info.pos.getY(), info.pos.getZ(), meta, null));
+        worldIn.setBlockState(info.pos, whichBranch.onBlockPlaced(worldIn, info.pos, info.facing, info.pos.getX(), info.pos.getY(), info.pos.getZ(), meta, null), 2);
         return true;
     }
 
