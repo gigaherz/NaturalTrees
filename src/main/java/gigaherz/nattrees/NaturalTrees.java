@@ -8,8 +8,11 @@ import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.BlockSapling;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ColorizerFoliage;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.biome.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
@@ -54,7 +57,6 @@ public class NaturalTrees
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
-
         MinecraftForge.TERRAIN_GEN_BUS.register(this);
 
         branchOak = new BlockBranch(Material.wood, BlockBranch.Variant.OAK, "branch_oak");
@@ -94,14 +96,14 @@ public class NaturalTrees
     @SubscribeEvent
     public void onDecorateBiome(DecorateBiomeEvent.Decorate ev)
     {
-        if (ev.type == DecorateBiomeEvent.Decorate.EventType.TREE)
+        if (ev.getType() == DecorateBiomeEvent.Decorate.EventType.TREE)
         {
 
-            BiomeGenBase gen = ev.world.getBiomeGenForCoords(ev.pos);
+            BiomeGenBase gen = ev.getWorld().getBiomeGenForCoords(ev.getPos());
             BiomeDecorator decorator = gen.theBiomeDecorator;
             int i = decorator.treesPerChunk;
 
-            if (ev.rand.nextInt(10) == 0)
+            if (ev.getRand().nextInt(10) == 0)
             {
                 ++i;
             }
@@ -110,7 +112,7 @@ public class NaturalTrees
             TreeGeneratorBase treeGen = null;
             if (gen instanceof BiomeGenForest)
             {
-                if (gen.biomeName.equals("Roofed Forest"))
+                if (gen.getBiomeName().equals("Roofed Forest"))
                     treeGen = generatorDarkOak;
                 else
                     treeGen = generatorOak.combineWith(generatorBirch, 0.1f);
@@ -147,12 +149,12 @@ public class NaturalTrees
 
                 for (int j = 0; j < i; ++j)
                 {
-                    int k = ev.rand.nextInt(16) + 8;
-                    int l = ev.rand.nextInt(16) + 8;
+                    int k = ev.getRand().nextInt(16) + 8;
+                    int l = ev.getRand().nextInt(16) + 8;
 
-                    BlockPos blockpos = ev.world.getHeight(ev.pos.add(k, 0, l));
+                    BlockPos blockpos = ev.getWorld().getHeight(ev.getPos().add(k, 0, l));
 
-                    treeGen.generateTreeAt(ev.world, blockpos, ev.rand);
+                    treeGen.generateTreeAt(ev.getWorld(), blockpos, ev.getRand());
                 }
             }
         }
@@ -161,7 +163,7 @@ public class NaturalTrees
     @SubscribeEvent
     public void onSaplingGrow(SaplingGrowTreeEvent ev)
     {
-        IBlockState state = ev.world.getBlockState(ev.pos);
+        IBlockState state = ev.getWorld().getBlockState(ev.getPos());
         Block block = state.getBlock();
         if (block == Blocks.sapling)
         {
@@ -171,7 +173,7 @@ public class NaturalTrees
             {
                 case OAK:
                     ev.setResult(Event.Result.DENY);
-                    new BirchTreeGenerator().generateTreeAt(ev.world, ev.pos, ev.rand);
+                    new BirchTreeGenerator().generateTreeAt(ev.getWorld(), ev.getPos(), ev.getRand());
                     break;
             }
         }

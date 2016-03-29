@@ -1,13 +1,14 @@
 package gigaherz.nattrees;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLeavesBase;
+import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.IGrowable;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.properties.PropertyDirection;
 import net.minecraft.block.properties.PropertyInteger;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
@@ -17,6 +18,8 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ColorizerFoliage;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
@@ -56,9 +59,8 @@ public class BlockBranch
         this.setCreativeTab(CreativeTabs.tabDecorations);
         this.setLightOpacity(1);
         this.setHardness(4);
-        this.setStepSound(Block.soundTypeWood);
+        this.setStepSound(SoundType.WOOD);
         this.setUnlocalizedName(unlocName);
-        this.setBlockBounds(0, 0, 0, 1, 1, 1);
     }
 
     @Override
@@ -91,13 +93,13 @@ public class BlockBranch
     }
 
     @Override
-    protected BlockState createBlockState()
+    protected BlockStateContainer createBlockState()
     {
-        return new BlockState(this, FACING, HAS_LEAVES, THICKNESS);
+        return new BlockStateContainer(this, FACING, HAS_LEAVES, THICKNESS);
     }
 
     @SideOnly(Side.CLIENT)
-    public int getBlockColor()
+    public int getBlockColor(IBlockState state)
     {
         return ColorizerFoliage.getFoliageColor(0.5D, 1.0D);
     }
@@ -115,39 +117,33 @@ public class BlockBranch
         return ColorizerFoliage.getFoliageColorBasic();
     }
 
+    @Override
     @SideOnly(Side.CLIENT)
-    public EnumWorldBlockLayer getBlockLayer()
+    public BlockRenderLayer getBlockLayer()
     {
-        return EnumWorldBlockLayer.CUTOUT_MIPPED;
-    }
-
-    @SideOnly(Side.CLIENT)
-    public int colorMultiplier(IBlockAccess worldIn, BlockPos pos, int renderPass)
-    {
-        return BiomeColorHelper.getFoliageColorAtPos(worldIn, pos);
+        return BlockRenderLayer.CUTOUT_MIPPED;
     }
 
     @Override
-    public boolean isOpaqueCube()
+    public boolean isOpaqueCube(IBlockState state)
     {
         return false;
     }
 
     @Override
-    public boolean isFullCube()
+    public boolean isFullCube(IBlockState state)
     {
         return false;
     }
 
     @Override
-    @SideOnly(Side.CLIENT)
-    public boolean shouldSideBeRendered(IBlockAccess worldIn, BlockPos pos, EnumFacing side)
+    public boolean shouldSideBeRendered(IBlockState blockState, IBlockAccess blockAccess, BlockPos pos, EnumFacing side)
     {
         return true;
     }
 
     @Override
-    public float getBlockHardness(World worldIn, BlockPos pos)
+    public float getBlockHardness(IBlockState state, World worldIn, BlockPos pos)
     {
         return this.blockHardness * (getThickness(worldIn, pos) + 1) / 8.0f;
     }
@@ -240,7 +236,9 @@ public class BlockBranch
     {
         BlockPos pos = thisPos.offset(facing);
 
-        Block block = worldIn.getBlockState(pos).getBlock();
+        IBlockState state = worldIn.getBlockState(pos);
+
+        Block block = state.getBlock();
         if (block == Blocks.barrier)
             return -1;
 
@@ -251,7 +249,7 @@ public class BlockBranch
             else return -1;
         }
 
-        if (block.isSideSolid(worldIn, pos, facing.getOpposite()))
+        if (block.isSideSolid(state, worldIn, pos, facing.getOpposite()))
             return sideValue;
 
         return -1;
@@ -270,34 +268,25 @@ public class BlockBranch
     }
 
     @Override
-    public void setBlockBoundsBasedOnState(IBlockAccess worldIn, BlockPos pos)
-    {
-        IBlockState state = worldIn.getBlockState(pos);
-        AxisAlignedBB aabb = getBB(0, 0, 0, state);
-        setBlockBounds(
-                (float)aabb.minX,
-                (float)aabb.minY,
-                (float)aabb.minZ,
-                (float)aabb.maxX,
-                (float)aabb.maxY,
-                (float)aabb.maxZ);
-    }
-
-    @Override
-    public AxisAlignedBB getSelectedBoundingBox(World worldIn, BlockPos pos)
-    {
-        IBlockState state = worldIn.getBlockState(pos);
-        return getBB(pos.getX(), pos.getY(), pos.getZ(), state);
-    }
-
-    @Override
-    public AxisAlignedBB getCollisionBoundingBox(World worldIn, BlockPos pos, IBlockState state)
+    public AxisAlignedBB getSelectedBoundingBox(IBlockState state, World worldIn, BlockPos pos)
     {
         return getBB(pos.getX(), pos.getY(), pos.getZ(), state);
     }
 
     @Override
-    public void addCollisionBoxesToList(World worldIn, BlockPos pos, IBlockState state, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity collidingEntity)
+    public AxisAlignedBB getCollisionBoundingBox(IBlockState state, World world, BlockPos pos)
+    {
+        return getBB(pos.getX(), pos.getY(), pos.getZ(), state);
+    }
+
+    @Override
+    public AxisAlignedBB getBoundingBox(IBlockState state, IBlockAccess source, BlockPos pos)
+    {
+        return getBB(0, 0, 0, state);
+    }
+
+    @Override
+    public void addCollisionBoxToList(IBlockState state, World worldIn, BlockPos pos, AxisAlignedBB mask, List<AxisAlignedBB> list, Entity p_185477_6_)
     {
         AxisAlignedBB aabb = getBB(pos.getX(), pos.getY(), pos.getZ(), state);
 
@@ -351,11 +340,11 @@ public class BlockBranch
     }
 
     @Override
-    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumFacing side, float hitX, float hitY, float hitZ)
+    public boolean onBlockActivated(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, ItemStack heldItem, EnumFacing side, float hitX, float hitY, float hitZ)
     {
         boolean hasLeaves = state.getValue(HAS_LEAVES);
 
-        ItemStack stack = playerIn.getHeldItem();
+        ItemStack stack = playerIn.getHeldItem(hand);
         if (stack != null && stack.stackSize > 0 && stack.getItem().getToolClasses(stack).contains("sword"))
         {
             if (hasLeaves)
@@ -371,7 +360,7 @@ public class BlockBranch
             if (stack != null && stack.stackSize > 0 && stack.getItem() instanceof ItemBlock)
             {
                 ItemBlock ib = (ItemBlock) stack.getItem();
-                if (ib.getBlock() instanceof BlockLeavesBase && !stack.hasTagCompound())
+                if (ib.getBlock() instanceof BlockLeaves && !stack.hasTagCompound())
                 {
                     stack.stackSize--;
                     worldIn.setBlockState(pos, state.withProperty(HAS_LEAVES, true));
@@ -467,7 +456,5 @@ public class BlockBranch
         {
             return canHaveLeaves;
         }
-
-        public static Variant[] values = values();
     }
 }

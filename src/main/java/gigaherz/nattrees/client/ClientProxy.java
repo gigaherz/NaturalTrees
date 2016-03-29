@@ -3,11 +3,16 @@ package gigaherz.nattrees.client;
 import gigaherz.nattrees.CommonProxy;
 import gigaherz.nattrees.NaturalTrees;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.resources.model.ModelBakery;
-import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.color.IBlockColor;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ColorizerFoliage;
+import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.biome.BiomeColorHelper;
 import net.minecraftforge.client.model.ModelLoader;
 
 public class ClientProxy extends CommonProxy
@@ -25,6 +30,20 @@ public class ClientProxy extends CommonProxy
     @Override
     public void init()
     {
+
+        Minecraft.getMinecraft().getBlockColors().registerBlockColorHandler(
+                new IBlockColor()
+                {
+                    public int colorMultiplier(IBlockState state, IBlockAccess world, BlockPos pos, int tintIndex)
+                    {
+                        if (world != null && pos != null)
+                            return BiomeColorHelper.getFoliageColorAtPos(world, pos);
+                        else
+                            return ColorizerFoliage.getFoliageColorBasic();
+                    }
+                }, NaturalTrees.branchOak, NaturalTrees.branchBirch,
+                NaturalTrees.branchSpruce, NaturalTrees.branchJungle,
+                NaturalTrees.branchDarkOak, NaturalTrees.branchAcacia);
     }
 
     public void registerBlockModelAsItem(final Block block, int meta, final String blockName, final String variant)
