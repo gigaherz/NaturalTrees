@@ -1,6 +1,6 @@
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package gigaherz.nattrees.generators;
+package gigaherz.nattrees.branch;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 

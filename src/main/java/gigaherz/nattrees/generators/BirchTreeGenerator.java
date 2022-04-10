@@ -1,10 +1,10 @@
 package gigaherz.nattrees.generators;
 
 import gigaherz.nattrees.branch.BlockBranch;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.util.Random;
 
@@ -16,10 +16,10 @@ public class BirchTreeGenerator extends AbstractTreeGenerator<BirchBranchInfo>
     }
 
     @Override
-    public ActionResultType generateTreeAt(World worldIn, BlockPos startPos, Random rand, int placeFlags)
+    public InteractionResult generateTreeAt(Level worldIn, BlockPos startPos, Random rand, int placeFlags)
     {
         if (!canSpawnTreeAt(worldIn, startPos))
-            return ActionResultType.FAIL;
+            return InteractionResult.FAIL;
 
         int tallness = rand.nextInt(4) + 5;
         int startThickness = tallness * 3 / 4;

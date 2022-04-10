@@ -1,7 +1,7 @@
 package gigaherz.nattrees.generators;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
 
 public class OakBranchInfo extends BranchInfo<OakBranchInfo>
 {

@@ -1,35 +1,43 @@
 package gigaherz.nattrees.branch;
 
 import com.google.common.collect.Maps;
-import net.minecraft.block.*;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.*;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Random;
 
-import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
-public class BlockBranch extends Block implements IGrowable
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraftforge.common.ToolActions;
+
+public class BlockBranch extends Block implements BonemealableBlock
 {
     public static final DirectionProperty FACING = DirectionProperty.create("facing", Direction.values());
     public static final BooleanProperty HAS_LEAVES = BooleanProperty.create("has_leaves");
@@ -47,7 +55,7 @@ public class BlockBranch extends Block implements IGrowable
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
     {
         builder.add(FACING, HAS_LEAVES, THICKNESS);
     }
@@ -61,16 +69,16 @@ public class BlockBranch extends Block implements IGrowable
 
 
     @Override
-    public float getDestroyProgress(BlockState state, PlayerEntity player, IBlockReader worldIn, BlockPos pos)
+    public float getDestroyProgress(BlockState state, Player player, BlockGetter worldIn, BlockPos pos)
     {
         return super.getDestroyProgress(state, player, worldIn, pos)
                 * (getThickness(worldIn, pos) + 1) / 8.0f;
     }
 
     /*@Override*/
-    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, Direction side, int thickness)
+    public boolean canPlaceBlockOnSide(Level worldIn, BlockPos pos, Direction side, int thickness)
     {
-        if (!worldIn.getBlockState(pos).isAir(worldIn, pos))
+        if (!worldIn.getBlockState(pos).isAir())
             return false;
 
         BlockPos npos = pos.relative(side.getOpposite());
@@ -88,7 +96,7 @@ public class BlockBranch extends Block implements IGrowable
     }
 
     /*@Override*/
-    public boolean canPlaceBlockAt(World worldIn, BlockPos pos, int thickness)
+    public boolean canPlaceBlockAt(Level worldIn, BlockPos pos, int thickness)
     {
         for (Direction facing : Direction.values())
         {
@@ -101,7 +109,7 @@ public class BlockBranch extends Block implements IGrowable
         return false;
     }
 
-    protected Direction getPreferredConnectionSide(IBlockReader worldIn, BlockPos pos, int thickness)
+    protected Direction getPreferredConnectionSide(BlockGetter worldIn, BlockPos pos, int thickness)
     {
         Direction face = Direction.DOWN;
         int preference = -1;
@@ -155,7 +163,7 @@ public class BlockBranch extends Block implements IGrowable
         return face;
     }
 
-    private int getConnectionValue(IBlockReader worldIn, BlockPos thisPos, Direction facing, int sideValue)
+    private int getConnectionValue(BlockGetter worldIn, BlockPos thisPos, Direction facing, int sideValue)
     {
         BlockPos pos = thisPos.relative(facing);
 
@@ -180,7 +188,7 @@ public class BlockBranch extends Block implements IGrowable
 
     @Nullable
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context)
+    public BlockState getStateForPlacement(BlockPlaceContext context)
     {
         BlockState state = defaultBlockState();
         return state.setValue(FACING, context.getClickedFace().getOpposite());
@@ -189,7 +197,7 @@ public class BlockBranch extends Block implements IGrowable
     private static Map<BlockState, VoxelShape> SHAPE_CACHE = Maps.newHashMap();
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
     {
         return SHAPE_CACHE.computeIfAbsent(state, (blockState) -> {
             boolean hasLeaves = blockState.getValue(HAS_LEAVES);
@@ -236,19 +244,19 @@ public class BlockBranch extends Block implements IGrowable
                     break;
             }
 
-            return VoxelShapes.create(new AxisAlignedBB(
+            return Shapes.create(new AABB(
                     west, down, north,
                     east, up, south));
         });
     }
 
     @Override
-    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit)
     {
         boolean hasLeaves = state.getValue(HAS_LEAVES);
 
         ItemStack stack = player.getItemInHand(handIn);
-        if (stack.getCount() > 0 && stack.getItem().getToolTypes(stack).contains("sword"))
+        if (stack.getCount() > 0 && stack.getItem().canPerformAction(stack, ToolActions.SWORD_DIG))
         {
             if (hasLeaves)
             {
@@ -267,14 +275,14 @@ public class BlockBranch extends Block implements IGrowable
                 {
                     stack.shrink(1);
                     worldIn.setBlockAndUpdate(pos, state.setValue(HAS_LEAVES, true));
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
             }
         }
-        return ActionResultType.FAIL;
+        return InteractionResult.FAIL;
     }
 
-    private boolean canHaveLeaves(World worldIn, BlockPos pos, @Nullable BlockState state)
+    private boolean canHaveLeaves(Level worldIn, BlockPos pos, @Nullable BlockState state)
     {
         if (state == null)
             state = worldIn.getBlockState(pos);
@@ -282,7 +290,7 @@ public class BlockBranch extends Block implements IGrowable
         return canHaveLeaves && state.getValue(THICKNESS) < 6;
     }
 
-    public int getThickness(IBlockReader worldIn, BlockPos pos)
+    public int getThickness(BlockGetter worldIn, BlockPos pos)
     {
         BlockState state = worldIn.getBlockState(pos);
         if (state.getBlock() != this)
@@ -291,26 +299,26 @@ public class BlockBranch extends Block implements IGrowable
     }
 
 
-    public boolean getHasLeaves(World worldIn, BlockPos pos)
+    public boolean getHasLeaves(Level worldIn, BlockPos pos)
     {
         BlockState state = worldIn.getBlockState(pos);
         return state.getValue(HAS_LEAVES);
     }
 
     @Override
-    public boolean isValidBonemealTarget(IBlockReader worldIn, BlockPos pos, BlockState state, boolean isClient)
+    public boolean isValidBonemealTarget(BlockGetter worldIn, BlockPos pos, BlockState state, boolean isClient)
     {
         return state.getValue(THICKNESS) < 7;
     }
 
     @Override
-    public boolean isBonemealSuccess(World worldIn, Random rand, BlockPos pos, BlockState state)
+    public boolean isBonemealSuccess(Level worldIn, Random rand, BlockPos pos, BlockState state)
     {
         return state.getValue(THICKNESS) < 7;
     }
 
     @Override
-    public void performBonemeal(ServerWorld world, Random random, BlockPos pos, BlockState state)
+    public void performBonemeal(ServerLevel world, Random random, BlockPos pos, BlockState state)
     {
         int thickness = state.getValue(THICKNESS);
         world.setBlockAndUpdate(pos, state.setValue(THICKNESS, thickness + 1));
@@ -318,6 +326,6 @@ public class BlockBranch extends Block implements IGrowable
 
     public Item createItemBlock()
     {
-        return new BlockItem(this, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(getRegistryName());
+        return new BlockItem(this, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)).setRegistryName(getRegistryName());
     }
 }

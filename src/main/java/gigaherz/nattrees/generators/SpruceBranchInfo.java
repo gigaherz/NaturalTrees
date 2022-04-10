@@ -1,8 +1,8 @@
 package gigaherz.nattrees.generators;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 
 public class SpruceBranchInfo extends BranchInfo<SpruceBranchInfo>
 {
@@ -38,7 +38,7 @@ public class SpruceBranchInfo extends BranchInfo<SpruceBranchInfo>
 
             // chance to continue growing up with the same thickness
             float shrinkFactor = (info.gen.rand.nextFloat() * 0.5f + 0.75f) * 8.0f / info.gen.tallness;
-            int shrink = MathHelper.floor(shrinkFactor);
+            int shrink = Mth.floor(shrinkFactor);
             int newThickness = info.thickness - shrink;
             shrinkFactor -= shrink;
             if (info.gen.rand.nextFloat() < shrinkFactor)

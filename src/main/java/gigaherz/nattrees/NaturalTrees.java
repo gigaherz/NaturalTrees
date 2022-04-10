@@ -3,15 +3,15 @@ package gigaherz.nattrees;
 import gigaherz.nattrees.branch.BlockBranch;
 import gigaherz.nattrees.branch.ItemNewSapling;
 import gigaherz.nattrees.generators.*;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.FoliageColors;
-import net.minecraft.world.biome.BiomeColors;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.FoliageColor;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -106,39 +106,39 @@ public class NaturalTrees
                 branchDarkOak.createItemBlock(),
                 branchAcacia.createItemBlock(),
 
-                new ItemNewSapling(branchOak, generatorOak, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_oak")),
-                new ItemNewSapling(branchBirch, generatorBirch, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_birch")),
-                new ItemNewSapling(branchSpruce, generatorSpruce, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_spruce")),
-                new ItemNewSapling(branchJungle, generatorJungle, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_jungle")),
-                new ItemNewSapling(branchDarkOak, generatorDarkOak, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_dark_oak")),
-                new ItemNewSapling(branchAcacia, generatorAcacia, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_acacia")));
+                new ItemNewSapling(branchOak, generatorOak, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)).setRegistryName(location("sapling_oak")),
+                new ItemNewSapling(branchBirch, generatorBirch, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)).setRegistryName(location("sapling_birch")),
+                new ItemNewSapling(branchSpruce, generatorSpruce, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)).setRegistryName(location("sapling_spruce")),
+                new ItemNewSapling(branchJungle, generatorJungle, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)).setRegistryName(location("sapling_jungle")),
+                new ItemNewSapling(branchDarkOak, generatorDarkOak, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)).setRegistryName(location("sapling_dark_oak")),
+                new ItemNewSapling(branchAcacia, generatorAcacia, new Item.Properties().tab(CreativeModeTab.TAB_DECORATIONS)).setRegistryName(location("sapling_acacia")));
     }
 
     public void clientSetup(FMLClientSetupEvent event)
     {
-        RenderTypeLookup.setRenderLayer(branchOak, RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(branchBirch, RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(branchSpruce, RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(branchJungle, RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(branchDarkOak, RenderType.cutout());
-        RenderTypeLookup.setRenderLayer(branchAcacia, RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(branchOak, RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(branchBirch, RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(branchSpruce, RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(branchJungle, RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(branchDarkOak, RenderType.cutout());
+        ItemBlockRenderTypes.setRenderLayer(branchAcacia, RenderType.cutout());
     }
 
     public void blockColors(ColorHandlerEvent.Block event)
     {
-        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColors.getEvergreenColor(), NaturalTrees.branchSpruce);
-        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColors.getBirchColor(), NaturalTrees.branchBirch);
+        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColor.getEvergreenColor(), NaturalTrees.branchSpruce);
+        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColor.getBirchColor(), NaturalTrees.branchBirch);
         event.getBlockColors().register( (state, world, pos, tintIndex) -> (world == null || pos == null)
-                        ? FoliageColors.getDefaultColor()
+                        ? FoliageColor.getDefaultColor()
                         : BiomeColors.getAverageFoliageColor(world, pos),
                 NaturalTrees.branchOak, NaturalTrees.branchJungle, NaturalTrees.branchDarkOak, NaturalTrees.branchAcacia);
     }
 
     public void itemColors(ColorHandlerEvent.Item event)
     {
-        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getEvergreenColor(),  NaturalTrees.branchSpruce);
-        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getBirchColor(), NaturalTrees.branchBirch);
-        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getDefaultColor(),
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColor.getEvergreenColor(),  NaturalTrees.branchSpruce);
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColor.getBirchColor(), NaturalTrees.branchBirch);
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColor.getDefaultColor(),
                 NaturalTrees.branchOak, NaturalTrees.branchJungle, NaturalTrees.branchDarkOak, NaturalTrees.branchAcacia);
     }
 

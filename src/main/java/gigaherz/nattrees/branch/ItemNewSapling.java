@@ -1,16 +1,16 @@
 package gigaherz.nattrees.branch;
 
 import gigaherz.nattrees.generators.ITreeGenerator;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.IPlantable;
 
 import java.util.Random;
@@ -28,22 +28,22 @@ public class ItemNewSapling extends Item implements IPlantable
     }
 
     @Override
-    public ActionResultType useOn(ItemUseContext context)
+    public InteractionResult useOn(UseOnContext context)
     {
         BlockPos pos = context.getClickedPos();
         Direction side = context.getClickedFace();
         pos = pos.relative(side);
 
         ItemStack stack = context.getItemInHand();
-        PlayerEntity player = context.getPlayer();
-        World world = context.getLevel();
+        Player player = context.getPlayer();
+        Level world = context.getLevel();
         if (stack.getCount() == 0)
         {
-            return ActionResultType.FAIL;
+            return InteractionResult.FAIL;
         }
         else if (!player.mayUseItemAt(pos, side, stack))
         {
-            return ActionResultType.FAIL;
+            return InteractionResult.FAIL;
         }
         /*else if (!world.getBlockState(pos).canPlaceBlockAt(world, pos, side, this))
         {
@@ -57,12 +57,12 @@ public class ItemNewSapling extends Item implements IPlantable
         {
             if (!world.isClientSide)
                 return treeGen.generateTreeAt(world, pos, new Random(), 3);
-            return ActionResultType.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
     }
 
     @Override
-    public BlockState getPlant(IBlockReader world, BlockPos pos)
+    public BlockState getPlant(BlockGetter world, BlockPos pos)
     {
         return baseBlock.defaultBlockState();
     }

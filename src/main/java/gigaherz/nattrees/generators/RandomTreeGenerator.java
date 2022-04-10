@@ -1,8 +1,8 @@
 package gigaherz.nattrees.generators;
 
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 import java.util.Random;
 
@@ -56,7 +56,7 @@ public class RandomTreeGenerator implements ITreeGenerator
     }
 
     @Override
-    public ActionResultType generateTreeAt(World worldIn, BlockPos startPos, Random rand, int placeFlags)
+    public InteractionResult generateTreeAt(Level worldIn, BlockPos startPos, Random rand, int placeFlags)
     {
         float choice = rand.nextFloat();
         for (int i = 0; i < chances.length; i++)
@@ -67,6 +67,6 @@ public class RandomTreeGenerator implements ITreeGenerator
                 return gens[i].generateTreeAt(worldIn, startPos, rand, placeFlags);
             }
         }
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 }

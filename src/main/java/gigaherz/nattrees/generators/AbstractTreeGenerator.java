@@ -1,12 +1,12 @@
 package gigaherz.nattrees.generators;
 
 import gigaherz.nattrees.branch.BlockBranch;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -66,11 +66,11 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
         }
     }
 
-    protected ActionResultType processQueue(T initial)
+    protected InteractionResult processQueue(T initial)
     {
         pending.add(initial);
 
-        return tickInternal() > 0 ? ActionResultType.SUCCESS : ActionResultType.PASS;
+        return tickInternal() > 0 ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 
     private int tickInternal()
@@ -99,7 +99,7 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
 
     protected abstract boolean getWillHaveLeaves(T info);
 
-    public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, Direction side)
+    public boolean canPlaceBlockOnSide(Level worldIn, BlockPos pos, Direction side)
     {
         BlockPos npos = pos.relative(side.getOpposite());
         Block block = worldIn.getBlockState(npos).getBlock();
@@ -124,7 +124,7 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
             Direction.SOUTH,
             Direction.DOWN
     };
-    public boolean canSpawnTreeAt(World worldIn, BlockPos pos)
+    public boolean canSpawnTreeAt(Level worldIn, BlockPos pos)
     {
         for (Direction facing : placePreferences)
         {
@@ -139,7 +139,7 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
 
     protected static class GenerationInfo
     {
-        public final World world;
+        public final Level world;
         public final Random rand;
         public final int tallness;
         public final double spreadness;
@@ -147,7 +147,7 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
         public final BlockPos root;
         public final int placeFlags;
 
-        public GenerationInfo(World world, BlockPos root, int tallness, double spreadness, int placeFlags, Random rand, int startThickness)
+        public GenerationInfo(Level world, BlockPos root, int tallness, double spreadness, int placeFlags, Random rand, int startThickness)
         {
             this.world = world;
             this.rand = rand;
