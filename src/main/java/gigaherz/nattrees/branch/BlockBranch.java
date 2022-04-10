@@ -27,6 +27,8 @@ import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Random;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class BlockBranch extends Block implements IGrowable
 {
     public static final DirectionProperty FACING = DirectionProperty.create("facing", Direction.values());
@@ -38,30 +40,30 @@ public class BlockBranch extends Block implements IGrowable
     public BlockBranch(Properties properties)
     {
         super(properties);
-        this.setDefaultState(this.getStateContainer().getBaseState()
-                .with(FACING, Direction.DOWN)
-                .with(HAS_LEAVES, false)
-                .with(THICKNESS, 0));
+        this.registerDefaultState(this.getStateDefinition().any()
+                .setValue(FACING, Direction.DOWN)
+                .setValue(HAS_LEAVES, false)
+                .setValue(THICKNESS, 0));
     }
 
     @Override
-    protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
     {
         builder.add(FACING, HAS_LEAVES, THICKNESS);
     }
 
     @Deprecated
     @Override
-    public boolean isSideInvisible(BlockState state, BlockState adjacentBlockState, Direction side)
+    public boolean skipRendering(BlockState state, BlockState adjacentBlockState, Direction side)
     {
         return false;
     }
 
 
     @Override
-    public float getPlayerRelativeBlockHardness(BlockState state, PlayerEntity player, IBlockReader worldIn, BlockPos pos)
+    public float getDestroyProgress(BlockState state, PlayerEntity player, IBlockReader worldIn, BlockPos pos)
     {
-        return super.getPlayerRelativeBlockHardness(state, player, worldIn, pos)
+        return super.getDestroyProgress(state, player, worldIn, pos)
                 * (getThickness(worldIn, pos) + 1) / 8.0f;
     }
 
@@ -71,18 +73,18 @@ public class BlockBranch extends Block implements IGrowable
         if (!worldIn.getBlockState(pos).isAir(worldIn, pos))
             return false;
 
-        BlockPos npos = pos.offset(side.getOpposite());
+        BlockPos npos = pos.relative(side.getOpposite());
         BlockState state = worldIn.getBlockState(npos);
         Block block = state.getBlock();
         if (block instanceof BlockBranch)
         {
-            return block == this && state.get(THICKNESS) >= thickness;
+            return block == this && state.getValue(THICKNESS) >= thickness;
         }
         if (side != Direction.UP)
             return false;
         if (block != Blocks.DIRT && block != Blocks.GRASS_BLOCK)
             return false;
-        return state.isSolidSide(worldIn, npos, side);
+        return state.isFaceSturdy(worldIn, npos, side);
     }
 
     /*@Override*/
@@ -155,7 +157,7 @@ public class BlockBranch extends Block implements IGrowable
 
     private int getConnectionValue(IBlockReader worldIn, BlockPos thisPos, Direction facing, int sideValue)
     {
-        BlockPos pos = thisPos.offset(facing);
+        BlockPos pos = thisPos.relative(facing);
 
         BlockState state = worldIn.getBlockState(pos);
 
@@ -170,7 +172,7 @@ public class BlockBranch extends Block implements IGrowable
             else return -1;
         }
 
-        if (state.isSolidSide(worldIn, pos, facing))
+        if (state.isFaceSturdy(worldIn, pos, facing))
             return sideValue;
 
         return -1;
@@ -180,8 +182,8 @@ public class BlockBranch extends Block implements IGrowable
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context)
     {
-        BlockState state = getDefaultState();
-        return state.with(FACING, context.getFace().getOpposite());
+        BlockState state = defaultBlockState();
+        return state.setValue(FACING, context.getClickedFace().getOpposite());
     }
 
     private static Map<BlockState, VoxelShape> SHAPE_CACHE = Maps.newHashMap();
@@ -190,7 +192,7 @@ public class BlockBranch extends Block implements IGrowable
     public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
     {
         return SHAPE_CACHE.computeIfAbsent(state, (blockState) -> {
-            boolean hasLeaves = blockState.get(HAS_LEAVES);
+            boolean hasLeaves = blockState.getValue(HAS_LEAVES);
 
             float west, down, north, east, up, south;
             if (hasLeaves)
@@ -200,7 +202,7 @@ public class BlockBranch extends Block implements IGrowable
             }
             else
             {
-                int thickness = blockState.get(THICKNESS);
+                int thickness = blockState.getValue(THICKNESS);
 
                 float width = (thickness + 1) * 2 / 16.0f;
 
@@ -212,7 +214,7 @@ public class BlockBranch extends Block implements IGrowable
                 up = 1 - down;
             }
 
-            switch (state.get(FACING))
+            switch (state.getValue(FACING))
             {
                 case EAST:
                     east = 1;
@@ -241,16 +243,16 @@ public class BlockBranch extends Block implements IGrowable
     }
 
     @Override
-    public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+    public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
     {
-        boolean hasLeaves = state.get(HAS_LEAVES);
+        boolean hasLeaves = state.getValue(HAS_LEAVES);
 
-        ItemStack stack = player.getHeldItem(handIn);
+        ItemStack stack = player.getItemInHand(handIn);
         if (stack.getCount() > 0 && stack.getItem().getToolTypes(stack).contains("sword"))
         {
             if (hasLeaves)
             {
-                worldIn.setBlockState(pos, state.with(HAS_LEAVES, false));
+                worldIn.setBlockAndUpdate(pos, state.setValue(HAS_LEAVES, false));
                 // TODO: pretend break leaf block
                 // BlockLeaves.dropBlockAsItem
             }
@@ -264,7 +266,7 @@ public class BlockBranch extends Block implements IGrowable
                 if (ib.getBlock() instanceof LeavesBlock && !stack.hasTag())
                 {
                     stack.shrink(1);
-                    worldIn.setBlockState(pos, state.with(HAS_LEAVES, true));
+                    worldIn.setBlockAndUpdate(pos, state.setValue(HAS_LEAVES, true));
                     return ActionResultType.SUCCESS;
                 }
             }
@@ -277,7 +279,7 @@ public class BlockBranch extends Block implements IGrowable
         if (state == null)
             state = worldIn.getBlockState(pos);
 
-        return canHaveLeaves && state.get(THICKNESS) < 6;
+        return canHaveLeaves && state.getValue(THICKNESS) < 6;
     }
 
     public int getThickness(IBlockReader worldIn, BlockPos pos)
@@ -285,37 +287,37 @@ public class BlockBranch extends Block implements IGrowable
         BlockState state = worldIn.getBlockState(pos);
         if (state.getBlock() != this)
             return 0;
-        return state.get(THICKNESS);
+        return state.getValue(THICKNESS);
     }
 
 
     public boolean getHasLeaves(World worldIn, BlockPos pos)
     {
         BlockState state = worldIn.getBlockState(pos);
-        return state.get(HAS_LEAVES);
+        return state.getValue(HAS_LEAVES);
     }
 
     @Override
-    public boolean canGrow(IBlockReader worldIn, BlockPos pos, BlockState state, boolean isClient)
+    public boolean isValidBonemealTarget(IBlockReader worldIn, BlockPos pos, BlockState state, boolean isClient)
     {
-        return state.get(THICKNESS) < 7;
+        return state.getValue(THICKNESS) < 7;
     }
 
     @Override
-    public boolean canUseBonemeal(World worldIn, Random rand, BlockPos pos, BlockState state)
+    public boolean isBonemealSuccess(World worldIn, Random rand, BlockPos pos, BlockState state)
     {
-        return state.get(THICKNESS) < 7;
+        return state.getValue(THICKNESS) < 7;
     }
 
     @Override
-    public void grow(ServerWorld world, Random random, BlockPos pos, BlockState state)
+    public void performBonemeal(ServerWorld world, Random random, BlockPos pos, BlockState state)
     {
-        int thickness = state.get(THICKNESS);
-        world.setBlockState(pos, state.with(THICKNESS, thickness + 1));
+        int thickness = state.getValue(THICKNESS);
+        world.setBlockAndUpdate(pos, state.setValue(THICKNESS, thickness + 1));
     }
 
     public Item createItemBlock()
     {
-        return new BlockItem(this, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(getRegistryName());
+        return new BlockItem(this, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(getRegistryName());
     }
 }

@@ -79,12 +79,12 @@ public class NaturalTrees
     public void registerBlocks(RegistryEvent.Register<Block> ev)
     {
         ev.getRegistry().registerAll(
-                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_oak")),
-                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_birch")),
-                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_spruce")),
-                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_jungle")),
-                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_dark_oak")),
-                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_acacia"))
+                new BlockBranch(Block.Properties.of(Material.WOOD).noOcclusion().strength(4, 4)).setRegistryName(location("branch_oak")),
+                new BlockBranch(Block.Properties.of(Material.WOOD).noOcclusion().strength(4, 4)).setRegistryName(location("branch_birch")),
+                new BlockBranch(Block.Properties.of(Material.WOOD).noOcclusion().strength(4, 4)).setRegistryName(location("branch_spruce")),
+                new BlockBranch(Block.Properties.of(Material.WOOD).noOcclusion().strength(4, 4)).setRegistryName(location("branch_jungle")),
+                new BlockBranch(Block.Properties.of(Material.WOOD).noOcclusion().strength(4, 4)).setRegistryName(location("branch_dark_oak")),
+                new BlockBranch(Block.Properties.of(Material.WOOD).noOcclusion().strength(4, 4)).setRegistryName(location("branch_acacia"))
         );
     }
 
@@ -106,39 +106,39 @@ public class NaturalTrees
                 branchDarkOak.createItemBlock(),
                 branchAcacia.createItemBlock(),
 
-                new ItemNewSapling(branchOak, generatorOak, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_oak")),
-                new ItemNewSapling(branchBirch, generatorBirch, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_birch")),
-                new ItemNewSapling(branchSpruce, generatorSpruce, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_spruce")),
-                new ItemNewSapling(branchJungle, generatorJungle, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_jungle")),
-                new ItemNewSapling(branchDarkOak, generatorDarkOak, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_dark_oak")),
-                new ItemNewSapling(branchAcacia, generatorAcacia, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_acacia")));
+                new ItemNewSapling(branchOak, generatorOak, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_oak")),
+                new ItemNewSapling(branchBirch, generatorBirch, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_birch")),
+                new ItemNewSapling(branchSpruce, generatorSpruce, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_spruce")),
+                new ItemNewSapling(branchJungle, generatorJungle, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_jungle")),
+                new ItemNewSapling(branchDarkOak, generatorDarkOak, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_dark_oak")),
+                new ItemNewSapling(branchAcacia, generatorAcacia, new Item.Properties().tab(ItemGroup.TAB_DECORATIONS)).setRegistryName(location("sapling_acacia")));
     }
 
     public void clientSetup(FMLClientSetupEvent event)
     {
-        RenderTypeLookup.setRenderLayer(branchOak, RenderType.getCutout());
-        RenderTypeLookup.setRenderLayer(branchBirch, RenderType.getCutout());
-        RenderTypeLookup.setRenderLayer(branchSpruce, RenderType.getCutout());
-        RenderTypeLookup.setRenderLayer(branchJungle, RenderType.getCutout());
-        RenderTypeLookup.setRenderLayer(branchDarkOak, RenderType.getCutout());
-        RenderTypeLookup.setRenderLayer(branchAcacia, RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(branchOak, RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(branchBirch, RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(branchSpruce, RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(branchJungle, RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(branchDarkOak, RenderType.cutout());
+        RenderTypeLookup.setRenderLayer(branchAcacia, RenderType.cutout());
     }
 
     public void blockColors(ColorHandlerEvent.Block event)
     {
-        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColors.getSpruce(), NaturalTrees.branchSpruce);
-        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColors.getBirch(), NaturalTrees.branchBirch);
+        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColors.getEvergreenColor(), NaturalTrees.branchSpruce);
+        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColors.getBirchColor(), NaturalTrees.branchBirch);
         event.getBlockColors().register( (state, world, pos, tintIndex) -> (world == null || pos == null)
-                        ? FoliageColors.getDefault()
-                        : BiomeColors.getFoliageColor(world, pos),
+                        ? FoliageColors.getDefaultColor()
+                        : BiomeColors.getAverageFoliageColor(world, pos),
                 NaturalTrees.branchOak, NaturalTrees.branchJungle, NaturalTrees.branchDarkOak, NaturalTrees.branchAcacia);
     }
 
     public void itemColors(ColorHandlerEvent.Item event)
     {
-        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getSpruce(),  NaturalTrees.branchSpruce);
-        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getBirch(), NaturalTrees.branchBirch);
-        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getDefault(),
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getEvergreenColor(),  NaturalTrees.branchSpruce);
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getBirchColor(), NaturalTrees.branchBirch);
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getDefaultColor(),
                 NaturalTrees.branchOak, NaturalTrees.branchJungle, NaturalTrees.branchDarkOak, NaturalTrees.branchAcacia);
     }
 

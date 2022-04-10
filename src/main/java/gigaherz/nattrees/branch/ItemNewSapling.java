@@ -28,20 +28,20 @@ public class ItemNewSapling extends Item implements IPlantable
     }
 
     @Override
-    public ActionResultType onItemUse(ItemUseContext context)
+    public ActionResultType useOn(ItemUseContext context)
     {
-        BlockPos pos = context.getPos();
-        Direction side = context.getFace();
-        pos = pos.offset(side);
+        BlockPos pos = context.getClickedPos();
+        Direction side = context.getClickedFace();
+        pos = pos.relative(side);
 
-        ItemStack stack = context.getItem();
+        ItemStack stack = context.getItemInHand();
         PlayerEntity player = context.getPlayer();
-        World world = context.getWorld();
+        World world = context.getLevel();
         if (stack.getCount() == 0)
         {
             return ActionResultType.FAIL;
         }
-        else if (!player.canPlayerEdit(pos, side, stack))
+        else if (!player.mayUseItemAt(pos, side, stack))
         {
             return ActionResultType.FAIL;
         }
@@ -55,7 +55,7 @@ public class ItemNewSapling extends Item implements IPlantable
         }*/
         else
         {
-            if (!world.isRemote)
+            if (!world.isClientSide)
                 return treeGen.generateTreeAt(world, pos, new Random(), 3);
             return ActionResultType.SUCCESS;
         }
@@ -64,6 +64,6 @@ public class ItemNewSapling extends Item implements IPlantable
     @Override
     public BlockState getPlant(IBlockReader world, BlockPos pos)
     {
-        return baseBlock.getDefaultState();
+        return baseBlock.defaultBlockState();
     }
 }

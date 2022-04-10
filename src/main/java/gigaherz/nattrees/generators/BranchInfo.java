@@ -51,7 +51,7 @@ abstract class BranchInfo<T extends BranchInfo<T>>
             int newThickness = offshoot.getRight();
             if (newThickness >= 0)
             {
-                BlockPos newPos = this.pos.offset(newFacing);
+                BlockPos newPos = this.pos.relative(newFacing);
                 T newInfo = makeBranch(newPos, newFacing, newThickness, length + 1);
                 owner.enqueueBranch(newInfo);
             }

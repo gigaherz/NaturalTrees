@@ -38,10 +38,10 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
         if (!branchBlock.canPlaceBlockOnSide(info.gen.world, info.pos, info.facing, info.thickness))
             return false;
 
-        info.gen.world.setBlockState(info.pos, branchBlock.getDefaultState()
-                .with(BlockBranch.THICKNESS, info.thickness)
-                .with(BlockBranch.HAS_LEAVES, info.leaves)
-                .with(BlockBranch.FACING, info.facing.getOpposite()), info.gen.placeFlags);
+        info.gen.world.setBlock(info.pos, branchBlock.defaultBlockState()
+                .setValue(BlockBranch.THICKNESS, info.thickness)
+                .setValue(BlockBranch.HAS_LEAVES, info.leaves)
+                .setValue(BlockBranch.FACING, info.facing.getOpposite()), info.gen.placeFlags);
         return true;
     }
 
@@ -94,14 +94,14 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
 
     protected boolean testFacing(T info, Direction testFacing)
     {
-        return branchBlock.canPlaceBlockOnSide(info.gen.world, info.pos.offset(testFacing), testFacing, info.thickness);
+        return branchBlock.canPlaceBlockOnSide(info.gen.world, info.pos.relative(testFacing), testFacing, info.thickness);
     }
 
     protected abstract boolean getWillHaveLeaves(T info);
 
     public boolean canPlaceBlockOnSide(World worldIn, BlockPos pos, Direction side)
     {
-        BlockPos npos = pos.offset(side.getOpposite());
+        BlockPos npos = pos.relative(side.getOpposite());
         Block block = worldIn.getBlockState(npos).getBlock();
         if (block instanceof BlockBranch)
         {

@@ -26,7 +26,7 @@ public class SpruceTreeGenerator extends AbstractTreeGenerator<SpruceBranchInfo>
         int startThickness = MathHelper.ceil(Math.min(7,tallness * 0.6f));
         double spreadness = tallness * 0.2 * (rand.nextDouble() * 0.5 + 0.75);
 
-        BlockPos centerPos = startPos.up(1);
+        BlockPos centerPos = startPos.above(1);
 
         GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand, startThickness);
 

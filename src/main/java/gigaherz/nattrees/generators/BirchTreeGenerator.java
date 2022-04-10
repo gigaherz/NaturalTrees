@@ -25,7 +25,7 @@ public class BirchTreeGenerator extends AbstractTreeGenerator<BirchBranchInfo>
         int startThickness = tallness * 3 / 4;
         double spreadness = tallness * 0.25 * (rand.nextDouble() * 2 + 2);
 
-        BlockPos centerPos = startPos.up(tallness + 1);
+        BlockPos centerPos = startPos.above(tallness + 1);
 
         GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand, startThickness);
 

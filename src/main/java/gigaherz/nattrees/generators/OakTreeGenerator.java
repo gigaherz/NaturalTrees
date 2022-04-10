@@ -30,7 +30,7 @@ public class OakTreeGenerator extends AbstractTreeGenerator<OakBranchInfo>
         int startThickness = tallness;
         double spreadness = tallness * 0.25 * (rand.nextDouble() * 2 + 2) * spreadnessModifier;
 
-        BlockPos centerPos = startPos.up(tallness + 1);
+        BlockPos centerPos = startPos.above(tallness + 1);
 
         GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand, startThickness);
 
