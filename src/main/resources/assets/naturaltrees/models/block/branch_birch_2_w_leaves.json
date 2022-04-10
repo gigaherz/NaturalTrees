@@ -1,0 +1,7 @@
+{
+    "parent": "naturaltrees:block/branch_2_w_leaves",
+    "textures": {
+        "log": "minecraft:block/birch_log",
+        "leaf": "minecraft:block/birch_leaves"
+    }
+}

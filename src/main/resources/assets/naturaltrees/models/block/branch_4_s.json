@@ -1,0 +1,32 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "#log"
+  },
+  "elements": [
+    {   "from": [ 3, 3, 3 ],
+      "to": [ 13, 13, 16 ],
+      "faces": {
+        "down":  { "uv": [ 3, 3, 13, 16 ], "texture": "#log" },
+        "up":    { "uv": [ 3, 3, 13, 16 ], "texture": "#log" },
+        "north": { "uv": [ 3, 3, 13, 13 ], "texture": "#log" },
+        "south": { "uv": [ 3, 3, 13, 13 ], "texture": "#log" },
+        "west":  { "uv": [ 3, 3, 16, 13 ], "texture": "#log" },
+        "east":  { "uv": [ 3, 3, 16, 13 ], "texture": "#log" }
+      },
+      "__comment": "Branch"
+    }
+,   {   "from": [ 3, 3, 16 ],
+      "to": [ 13, 13, 19 ],
+      "faces": {
+        "down":  { "uv": [ 3, 0, 13, 3 ], "texture": "#log" },
+        "up":    { "uv": [ 3, 0, 13, 3 ], "texture": "#log" },
+        "north": { "uv": [ 3, 3, 13, 13 ], "texture": "#log" },
+        "south": { "uv": [ 3, 3, 13, 13 ], "texture": "#log" },
+        "west":  { "uv": [ 0, 3, 3, 13 ], "texture": "#log" },
+        "east":  { "uv": [ 0, 3, 3, 13 ], "texture": "#log" }
+      },
+      "__comment": "Branch Extension"
+    }
+  ]
+}

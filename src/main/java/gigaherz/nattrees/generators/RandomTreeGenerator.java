@@ -1,77 +1,72 @@
 package gigaherz.nattrees.generators;
 
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
-public class RandomTreeGenerator
-        extends TreeGeneratorBase
+public class RandomTreeGenerator implements ITreeGenerator
 {
+    private final ITreeGenerator[] gens;
+    private final float[] chances;
 
-    final List<TreeGeneratorBase> gens = new ArrayList<TreeGeneratorBase>();
-    final List<Float> chances = new ArrayList<Float>();
-
-    public RandomTreeGenerator(TreeGeneratorBase primary, TreeGeneratorBase other, float chanceAlternative)
+    private RandomTreeGenerator(ITreeGenerator[] generators, float[] chances)
     {
-        super(primary.whichBranch);
-
-        gens.add(primary);
-        chances.add(1.0f);
-
-        gens.add(other);
-        chances.add(chanceAlternative);
+        this.gens = generators;
+        this.chances = chances;
     }
 
-    @Override
-    public TreeGeneratorBase combineWith(TreeGeneratorBase other, float chanceAlternative)
+    public static ITreeGenerator of(AbstractTreeGenerator first)
     {
-        // TODO: make immutable?
-
-        gens.add(other);
-        chances.add(chanceAlternative);
-
-        return this;
+        return first;
     }
 
-
-    @Override
-    public boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand)
+    public static ITreeGenerator of(float chanceFirst, ITreeGenerator first, float chanceSecond, ITreeGenerator second)
     {
+        return new RandomTreeGenerator(new ITreeGenerator[]{first, second}, new float[]{chanceFirst, chanceSecond});
+    }
 
-        float totalChance = 0;
-        for (float f : chances) { totalChance += f; }
+    public static ITreeGenerator of(float chanceFirst, ITreeGenerator first, float chanceSecond, ITreeGenerator second, float chance3, ITreeGenerator gen3)
+    {
+        return new RandomTreeGenerator(
+                new ITreeGenerator[]{first, second, gen3},
+                new float[]{chanceFirst, chanceSecond, chance3});
+    }
 
-        float choice = rand.nextFloat() * totalChance;
-        for (int i = 0; i < chances.size(); i++)
+    public static ITreeGenerator of(float chanceFirst, ITreeGenerator first, float chanceSecond, ITreeGenerator second, float chance3, ITreeGenerator gen3, float chance4, ITreeGenerator gen4)
+    {
+        return new RandomTreeGenerator(
+                new ITreeGenerator[]{first, second, gen3, gen4},
+                new float[]{chanceFirst, chanceSecond, chance3, chance4});
+    }
+
+    public static ITreeGenerator of(Object... args)
+    {
+        if (args.length %2 != 0)
+            throw new IllegalStateException("Args must be a sequence of float,ITreeGenerator pairs");
+        ITreeGenerator[] gens = new ITreeGenerator[args.length/2];
+        float[] chances = new float[args.length/2];
+        for(int i=0;i<args.length;i+=2)
         {
-            choice -= chances.get(i);
+            gens[i/2] = (ITreeGenerator)args[i];
+            chances[i/2] = (Float)args[i+1];
+        }
+        return new RandomTreeGenerator(gens, chances);
+    }
+
+    @Override
+    public ActionResultType generateTreeAt(World worldIn, BlockPos startPos, Random rand, int placeFlags)
+    {
+        float choice = rand.nextFloat();
+        for (int i = 0; i < chances.length; i++)
+        {
+            choice -= chances[i];
             if (choice <= 0)
             {
-                return gens.get(i).generateTreeAt(worldIn, startPos, rand);
+                return gens[i].generateTreeAt(worldIn, startPos, rand, placeFlags);
             }
         }
-        return false;
-    }
-
-    @Override
-    protected boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing)
-    {
-        return false;
-    }
-
-    @Override
-    protected boolean getWillHaveLeaves(BranchInfo info)
-    {
-        return false;
-    }
-
-    @Override
-    protected int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos)
-    {
-        return 0;
+        return ActionResultType.PASS;
     }
 }

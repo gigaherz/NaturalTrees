@@ -1,10 +1,10 @@
 {
+  "parent": "block/block",
   "textures": {
     "particle": "#log"
   },
   "elements": [
-    {
-      "from": [ 2, 0, 2 ],
+    {   "from": [ 2, 0, 2 ],
       "to": [ 14, 14, 14 ],
       "faces": {
         "down":  { "uv": [ 2, 2, 14, 14 ], "texture": "#log" },
@@ -15,9 +15,8 @@
         "east":  { "uv": [ 2, 0, 14, 14 ], "texture": "#log" }
       },
       "__comment": "Branch"
-    },
-    {
-      "from": [ 2, -2, 2 ],
+    }
+,   {   "from": [ 2, -2, 2 ],
       "to": [ 14, 0, 14 ],
       "faces": {
         "down":  { "uv": [ 2, 2, 14, 14 ], "texture": "#log" },

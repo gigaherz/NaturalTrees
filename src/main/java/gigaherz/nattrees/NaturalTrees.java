@@ -1,143 +1,192 @@
 package gigaherz.nattrees;
 
-import gigaherz.nattrees.generators.BirchTreeGenerator;
-import gigaherz.nattrees.generators.OakTreeGenerator;
-import gigaherz.nattrees.generators.TreeGeneratorBase;
+import gigaherz.nattrees.branch.BlockBranch;
+import gigaherz.nattrees.branch.ItemNewSapling;
+import gigaherz.nattrees.generators.*;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockPlanks;
-import net.minecraft.block.BlockSapling;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.color.IBlockColor;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ColorizerFoliage;
-import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.biome.*;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.terraingen.DecorateBiomeEvent;
-import net.minecraftforge.event.terraingen.SaplingGrowTreeEvent;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.FoliageColors;
+import net.minecraft.world.biome.BiomeColors;
+import net.minecraftforge.client.event.ColorHandlerEvent;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.eventhandler.Event;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ObjectHolder;
 
+import java.util.logging.Logger;
 
-@Mod(modid = NaturalTrees.MODID, name = NaturalTrees.MODNAME, version = NaturalTrees.VERSION)
+@Mod(NaturalTrees.MODID)
 public class NaturalTrees
 {
-    public static final String MODID = "NaturalTrees";
-    public static final String MODNAME = "Natural Trees";
-    public static final String VERSION = "1.0";
+    public static final String MODID = "naturaltrees";
 
+    @ObjectHolder(MODID + ":branch_oak")
     public static BlockBranch branchOak;
+    @ObjectHolder(MODID + ":branch_birch")
     public static BlockBranch branchBirch;
+    @ObjectHolder(MODID + ":branch_spruce")
     public static BlockBranch branchSpruce;
+    @ObjectHolder(MODID + ":branch_jungle")
     public static BlockBranch branchJungle;
+    @ObjectHolder(MODID + ":branch_dark_oak")
     public static BlockBranch branchDarkOak;
+    @ObjectHolder(MODID + ":branch_acacia")
     public static BlockBranch branchAcacia;
 
-    public static TreeGeneratorBase generatorOak;
-    public static TreeGeneratorBase generatorBirch;
-    public static TreeGeneratorBase generatorSpruce;
-    public static TreeGeneratorBase generatorJungle;
-    public static TreeGeneratorBase generatorDarkOak;
-    public static TreeGeneratorBase generatorAcacia;
+    @ObjectHolder(MODID + ":sapling_oak")
+    public static ItemNewSapling saplingOak;
+    @ObjectHolder(MODID + ":sapling_birch")
+    public static ItemNewSapling saplingBirch;
+    @ObjectHolder(MODID + ":sapling_spruce")
+    public static ItemNewSapling saplingSpruce;
+    @ObjectHolder(MODID + ":sapling_jungle")
+    public static ItemNewSapling saplingJungle;
+    @ObjectHolder(MODID + ":sapling_dark_oak")
+    public static ItemNewSapling saplingDarkOak;
+    @ObjectHolder(MODID + ":sapling_acacia")
+    public static ItemNewSapling saplingAcacia;
 
-    @Mod.Instance(value = NaturalTrees.MODID)
+    public static ITreeGenerator generatorOak;
+    public static ITreeGenerator generatorBirch;
+    public static ITreeGenerator generatorSpruce;
+    public static ITreeGenerator generatorJungle;
+    public static ITreeGenerator generatorDarkOak;
+    public static ITreeGenerator generatorAcacia;
+
     public static NaturalTrees instance;
 
-    @SidedProxy(clientSide = "gigaherz.nattrees.client.ClientProxy", serverSide = "gigaherz.nattrees.CommonProxy")
-    public static CommonProxy proxy;
+    public static final Logger LOGGER = Logger.getLogger(MODID);
 
-    @EventHandler
-    public void preInit(FMLPreInitializationEvent event)
+    public NaturalTrees()
     {
-        MinecraftForge.TERRAIN_GEN_BUS.register(this);
+        instance = this;
 
-        branchOak = new BlockBranch(Material.wood, BlockBranch.Variant.OAK, "branch_oak");
-        GameRegistry.registerBlock(branchOak, "branch_oak");
-
-        branchBirch = new BlockBranch(Material.wood, BlockBranch.Variant.BIRCH, "branch_birch");
-        GameRegistry.registerBlock(branchBirch, "branch_birch");
-
-        branchSpruce = new BlockBranch(Material.wood, BlockBranch.Variant.SPRUCE, "branch_spruce");
-        GameRegistry.registerBlock(branchSpruce, "branch_spruce");
-
-        branchJungle = new BlockBranch(Material.wood, BlockBranch.Variant.JUNGLE, "branch_jungle");
-        GameRegistry.registerBlock(branchJungle, "branch_jungle");
-
-        branchDarkOak = new BlockBranch(Material.wood, BlockBranch.Variant.DARK_OAK, "branch_dark_oak");
-        GameRegistry.registerBlock(branchDarkOak, "branch_dark_oak");
-
-        branchAcacia = new BlockBranch(Material.wood, BlockBranch.Variant.ACACIA, "branch_acacia");
-        GameRegistry.registerBlock(branchAcacia, "branch_acacia");
-
-        proxy.preInit();
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.addGenericListener(Block.class, this::registerBlocks);
+        modEventBus.addGenericListener(Item.class, this::registerItems);
+        modEventBus.addListener(this::clientSetup);
+        modEventBus.addListener(this::blockColors);
+        modEventBus.addListener(this::itemColors);
     }
 
-    @EventHandler
-    public void init(FMLInitializationEvent event)
+    public void registerBlocks(RegistryEvent.Register<Block> ev)
     {
-        proxy.init();
-
-        generatorOak = new OakTreeGenerator();
-        generatorBirch = new BirchTreeGenerator();
-        generatorSpruce = new OakTreeGenerator();
-        generatorJungle = new OakTreeGenerator();
-        generatorDarkOak = new OakTreeGenerator();
-        generatorAcacia = new OakTreeGenerator();
+        ev.getRegistry().registerAll(
+                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_oak")),
+                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_birch")),
+                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_spruce")),
+                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_jungle")),
+                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_dark_oak")),
+                new BlockBranch(Block.Properties.create(Material.WOOD).notSolid().hardnessAndResistance(4, 4)).setRegistryName(location("branch_acacia"))
+        );
     }
 
-    @SubscribeEvent
+    public void registerItems(RegistryEvent.Register<Item> ev)
+    {
+        generatorOak = new OakTreeGenerator(NaturalTrees.branchOak, 1.0f, 1.0f);
+        generatorBirch = new BirchTreeGenerator(NaturalTrees.branchBirch);
+        generatorSpruce = new SpruceTreeGenerator(NaturalTrees.branchSpruce);
+        // TODO: custom generators
+        generatorJungle = new OakTreeGenerator(NaturalTrees.branchJungle, 3.0f, 0.5f);
+        generatorDarkOak = new OakTreeGenerator(NaturalTrees.branchDarkOak, 2.0f, 1.1f);
+        generatorAcacia = new OakTreeGenerator(NaturalTrees.branchAcacia, 1.0f, 2.0f);
+
+        ev.getRegistry().registerAll(
+                branchOak.createItemBlock(),
+                branchBirch.createItemBlock(),
+                branchSpruce.createItemBlock(),
+                branchJungle.createItemBlock(),
+                branchDarkOak.createItemBlock(),
+                branchAcacia.createItemBlock(),
+
+                new ItemNewSapling(branchOak, generatorOak, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_oak")),
+                new ItemNewSapling(branchBirch, generatorBirch, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_birch")),
+                new ItemNewSapling(branchSpruce, generatorSpruce, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_spruce")),
+                new ItemNewSapling(branchJungle, generatorJungle, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_jungle")),
+                new ItemNewSapling(branchDarkOak, generatorDarkOak, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_dark_oak")),
+                new ItemNewSapling(branchAcacia, generatorAcacia, new Item.Properties().group(ItemGroup.DECORATIONS)).setRegistryName(location("sapling_acacia")));
+    }
+
+    public void clientSetup(FMLClientSetupEvent event)
+    {
+        RenderTypeLookup.setRenderLayer(branchOak, RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(branchBirch, RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(branchSpruce, RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(branchJungle, RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(branchDarkOak, RenderType.getCutout());
+        RenderTypeLookup.setRenderLayer(branchAcacia, RenderType.getCutout());
+    }
+
+    public void blockColors(ColorHandlerEvent.Block event)
+    {
+        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColors.getSpruce(), NaturalTrees.branchSpruce);
+        event.getBlockColors().register((state, world, pos, tintIndex) -> FoliageColors.getBirch(), NaturalTrees.branchBirch);
+        event.getBlockColors().register( (state, world, pos, tintIndex) -> (world == null || pos == null)
+                        ? FoliageColors.getDefault()
+                        : BiomeColors.getFoliageColor(world, pos),
+                NaturalTrees.branchOak, NaturalTrees.branchJungle, NaturalTrees.branchDarkOak, NaturalTrees.branchAcacia);
+    }
+
+    public void itemColors(ColorHandlerEvent.Item event)
+    {
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getSpruce(),  NaturalTrees.branchSpruce);
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getBirch(), NaturalTrees.branchBirch);
+        event.getItemColors().register((itemstack, tintIndex) -> FoliageColors.getDefault(),
+                NaturalTrees.branchOak, NaturalTrees.branchJungle, NaturalTrees.branchDarkOak, NaturalTrees.branchAcacia);
+    }
+
+    /*@SubscribeEvent
     public void onDecorateBiome(DecorateBiomeEvent.Decorate ev)
     {
         if (ev.getType() == DecorateBiomeEvent.Decorate.EventType.TREE)
         {
-
-            BiomeGenBase gen = ev.getWorld().getBiomeGenForCoords(ev.getPos());
-            BiomeDecorator decorator = gen.theBiomeDecorator;
+            Biome gen = ev.getWorld().getBiome(ev.getPlacementPos());
+            BiomeDecorator decorator = gen.decorator;
             int i = decorator.treesPerChunk;
+            int i = 10;
 
             if (ev.getRand().nextInt(10) == 0)
             {
                 ++i;
             }
 
-
             TreeGeneratorBase treeGen = null;
-            if (gen instanceof BiomeGenForest)
+            if (gen instanceof ForestBiome)
             {
-                if (gen.getBiomeName().equals("Roofed Forest"))
-                    treeGen = generatorDarkOak;
-                else
-                    treeGen = generatorOak.combineWith(generatorBirch, 0.1f);
+                treeGen = generatorOak.combineWith(generatorBirch, 0.1f);
             }
-            else if (gen instanceof BiomeGenJungle)
+            else if (gen instanceof DarkForestBiome)
+            {
+                treeGen = generatorDarkOak;
+            }
+            else if (gen instanceof JungleBiome)
             {
                 treeGen = generatorJungle;
             }
-            else if (gen instanceof BiomeGenPlains)
+            else if (gen instanceof PlainsBiome)
             {
                 treeGen = generatorOak;
             }
-            else if (gen instanceof BiomeGenSavanna)
+            else if (gen instanceof SavannaBiome)
             {
                 treeGen = generatorAcacia;
             }
-            else if (gen instanceof BiomeGenSnow)
+            else if (gen instanceof SnowyTundraBiome)
             {
                 treeGen = generatorOak;
             }
-            else if (gen instanceof BiomeGenSwamp)
+            else if (gen instanceof SwampBiome)
             {
                 treeGen = generatorOak;
             }
-            else if (gen instanceof BiomeGenTaiga)
+            else if (gen instanceof TaigaBiome)
             {
                 treeGen = generatorSpruce;
             }
@@ -152,7 +201,7 @@ public class NaturalTrees
                     int k = ev.getRand().nextInt(16) + 8;
                     int l = ev.getRand().nextInt(16) + 8;
 
-                    BlockPos blockpos = ev.getWorld().getHeight(ev.getPos().add(k, 0, l));
+                    BlockPos blockpos = ev.getWorld().getHeight(Heightmap.Type.WORLD_SURFACE, ev.getPlacementPos().add(k, 0, l));
 
                     treeGen.generateTreeAt(ev.getWorld(), blockpos, ev.getRand());
                 }
@@ -165,7 +214,7 @@ public class NaturalTrees
     {
         IBlockState state = ev.getWorld().getBlockState(ev.getPos());
         Block block = state.getBlock();
-        if (block == Blocks.sapling)
+        if (block == Blocks.SAPLING)
         {
             BlockPlanks.EnumType type = state.getValue(BlockSapling.TYPE);
 
@@ -177,5 +226,10 @@ public class NaturalTrees
                     break;
             }
         }
+    }*/
+
+    public static ResourceLocation location(String path)
+    {
+        return new ResourceLocation(MODID, path);
     }
 }

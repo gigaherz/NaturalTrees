@@ -1,20 +1,29 @@
-/.gradle
-/.idea
-/eclipse
-/run
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
 
-/CREDITS-fml.txt
-/LICENSE-fml.txt
-/MinecraftForge-Credits.txt
-/MinecraftForge-License.txt
-/README.txt
-/forge-1.8-11.14.0.1281-1.8-changelog.txt
-/forge.iml
-/gradle/wrapper/gradle-wrapper.jar
-/gradle/wrapper/gradle-wrapper.properties
-/gradlew
-/gradlew.bat
-
-*.bak
-*.rhl
+# idea
+out
+*.ipr
+*.iws
 *.iml
+.idea
+
+# gradle
+build
+.gradle
+
+# other
+eclipse
+/classes
+
+run/*
+!run/thingpacks
+run/thingpacks/*
+!run/thingpacks/sandwood
+!run/thingpacks/test
+

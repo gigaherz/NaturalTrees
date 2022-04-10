@@ -1,25 +1,25 @@
 package gigaherz.nattrees.generators;
 
-import gigaherz.nattrees.NaturalTrees;
+import gigaherz.nattrees.branch.BlockBranch;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 
 import java.util.Random;
 
-public class BirchTreeGenerator extends TreeGeneratorBase
+public class BirchTreeGenerator extends AbstractTreeGenerator<BirchBranchInfo>
 {
-
-    public BirchTreeGenerator()
+    public BirchTreeGenerator(BlockBranch branch)
     {
-        super(NaturalTrees.branchBirch);
+        super(branch);
     }
 
     @Override
-    public boolean generateTreeAt(World worldIn, BlockPos startPos, Random rand)
+    public ActionResultType generateTreeAt(World worldIn, BlockPos startPos, Random rand, int placeFlags)
     {
         if (!canSpawnTreeAt(worldIn, startPos))
-            return false;
+            return ActionResultType.FAIL;
 
         int tallness = rand.nextInt(4) + 5;
         int startThickness = tallness * 3 / 4;
@@ -27,66 +27,16 @@ public class BirchTreeGenerator extends TreeGeneratorBase
 
         BlockPos centerPos = startPos.up(tallness + 1);
 
-        BranchInfo initialState = new BranchInfo(startPos, EnumFacing.UP, startThickness, 1);
+        GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand);
 
-        return processQueue(worldIn, rand, initialState, tallness, spreadness, centerPos);
+        BirchBranchInfo initialState = new BirchBranchInfo(this, gen, startPos, Direction.UP, startThickness, 1);
+
+        return processQueue(initialState);
     }
 
     @Override
-    protected boolean shouldSkipFacing(int length, int tallness, EnumFacing facing, EnumFacing newFacing)
-    {
-        return length < tallness * 4 / 5 && newFacing != facing;
-    }
-
-    @Override
-    protected boolean getWillHaveLeaves(BranchInfo info)
+    protected boolean getWillHaveLeaves(BirchBranchInfo info)
     {
         return info.thickness <= 1;
-    }
-
-    @Override
-    protected int getRandomThicknessForFacing(BlockPos pos, EnumFacing facing, Random rand, EnumFacing newFacing, int thickness, int length, int tallness, double spreadness, BlockPos centerPos)
-    {
-        int min = -5;
-        int max = thickness + 5;
-
-        if (length < tallness)
-        {
-            if (newFacing == facing)
-                min = thickness;
-            else
-                min = -max;
-        }
-        else if (newFacing == EnumFacing.DOWN)
-        {
-            min = -20;
-            max = 1;
-        }
-
-        double distance = computeDistanceFromCenter(pos, centerPos);
-        max = (int) Math.min(max, Math.max(tallness - length, spreadness - distance) + 1);
-
-        int thick = max;
-        if (min < max)
-            thick = rand.nextInt(max - min) + min;
-        return thick;
-    }
-
-    protected double computeDistanceFromCenter(BlockPos centerPos, BlockPos pos)
-    {
-        double X0 = centerPos.getX();
-        double Y0 = centerPos.getY();
-        double Z0 = centerPos.getZ();
-        double X1 = pos.getX();
-        double Y1 = pos.getY();
-        double Z1 = pos.getZ();
-
-        double dx = (X1 - X0) * 1.0;
-        double dy = (Y1 - Y0) * 0.5;
-        double dz = (Z1 - Z0) * 1.0;
-
-        double dd = (dx * dx + dy * dy + dz * dz);
-
-        return Math.sqrt(dd);
     }
 }

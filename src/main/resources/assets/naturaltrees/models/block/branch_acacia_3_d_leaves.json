@@ -1,0 +1,7 @@
+{
+    "parent": "naturaltrees:block/branch_3_d_leaves",
+    "textures": {
+        "log": "minecraft:block/acacia_log",
+        "leaf": "minecraft:block/acacia_leaves"
+    }
+}
