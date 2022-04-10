@@ -32,7 +32,7 @@ public class OakTreeGenerator extends AbstractTreeGenerator<OakBranchInfo>
 
         BlockPos centerPos = startPos.up(tallness + 1);
 
-        GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand);
+        GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand, startThickness);
 
         OakBranchInfo initialState = new OakBranchInfo(this, gen, startPos, Direction.UP, startThickness, 1);
 

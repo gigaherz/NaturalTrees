@@ -27,7 +27,7 @@ public class BirchTreeGenerator extends AbstractTreeGenerator<BirchBranchInfo>
 
         BlockPos centerPos = startPos.up(tallness + 1);
 
-        GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand);
+        GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand, startThickness);
 
         BirchBranchInfo initialState = new BirchBranchInfo(this, gen, startPos, Direction.UP, startThickness, 1);
 

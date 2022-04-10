@@ -28,7 +28,7 @@ public class SpruceTreeGenerator extends AbstractTreeGenerator<SpruceBranchInfo>
 
         BlockPos centerPos = startPos.up(1);
 
-        GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand);
+        GenerationInfo gen = new GenerationInfo(worldIn, centerPos, tallness, spreadness, placeFlags, rand, startThickness);
 
         SpruceBranchInfo initialState = new SpruceBranchInfo(this, gen, startPos, Direction.UP, startThickness, 1);
 

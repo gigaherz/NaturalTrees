@@ -77,7 +77,7 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
     {
         int placed = 0;
 
-        while (pending.size() > 0 && placed < 5)
+        while (pending.size() > 0 && placed < 30)
         {
             T info = pending.remove();
 
@@ -116,11 +116,19 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
         return true; // worldIn.isSideSolid(npos, side, true);
     }
 
+    private final Direction[] placePreferences = {
+            Direction.UP,
+            Direction.EAST,
+            Direction.NORTH,
+            Direction.WEST,
+            Direction.SOUTH,
+            Direction.DOWN
+    };
     public boolean canSpawnTreeAt(World worldIn, BlockPos pos)
     {
-        for (Direction facing : Direction.values())
+        for (Direction facing : placePreferences)
         {
-            if (canPlaceBlockOnSide(worldIn, pos.offset(facing.getOpposite()), facing))
+            if (canPlaceBlockOnSide(worldIn, pos, facing))
             {
                 return true;
             }
@@ -135,10 +143,11 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
         public final Random rand;
         public final int tallness;
         public final double spreadness;
+        public final int startThickness;
         public final BlockPos root;
         public final int placeFlags;
 
-        public GenerationInfo(World world, BlockPos root, int tallness, double spreadness, int placeFlags, Random rand)
+        public GenerationInfo(World world, BlockPos root, int tallness, double spreadness, int placeFlags, Random rand, int startThickness)
         {
             this.world = world;
             this.rand = rand;
@@ -146,6 +155,7 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
             this.spreadness = spreadness;
             this.root = root;
             this.placeFlags = placeFlags;
+            this.startThickness = startThickness;
         }
     }
 }
