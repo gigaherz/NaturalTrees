@@ -12,9 +12,11 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Stream;
 
-public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements ITreeGenerator
+public abstract class AbstractTreeGenerator<T extends AbstractTreeGenerator.BranchInfo<T>> implements ITreeGenerator
 {
     final BlockBranch branchBlock;
 
@@ -137,25 +139,78 @@ public abstract class AbstractTreeGenerator<T extends BranchInfo<T>> implements 
         return false;
     }
 
-    protected static class GenerationInfo
+    protected record GenerationInfo(
+            Level world,
+            BlockPos root,
+            int tallness,
+            double spreadness,
+            int placeFlags,
+            Random rand,
+            int startThickness)
     {
-        public final Level world;
-        public final Random rand;
-        public final int tallness;
-        public final double spreadness;
-        public final int startThickness;
-        public final BlockPos root;
-        public final int placeFlags;
+    }
 
-        public GenerationInfo(Level world, BlockPos root, int tallness, double spreadness, int placeFlags, Random rand, int startThickness)
+    abstract static class BranchInfo<T extends BranchInfo<T>>
+    {
+        public final AbstractTreeGenerator<T> owner;
+        public final GenerationInfo gen;
+        public final BlockPos pos;
+        public Direction facing;
+        public int thickness;
+        public boolean leaves;
+        public int length;
+
+        protected BranchInfo(AbstractTreeGenerator<T> owner, GenerationInfo gen, BlockPos pos, Direction facing, int thickness, int length)
         {
-            this.world = world;
-            this.rand = rand;
-            this.tallness = tallness;
-            this.spreadness = spreadness;
-            this.root = root;
-            this.placeFlags = placeFlags;
-            this.startThickness = startThickness;
+            this.owner = owner;
+            this.gen = gen;
+            this.pos = pos;
+            this.facing = facing;
+            this.thickness = thickness;
+            this.length = length;
+        }
+
+        public double horizontalDistanceFromCenter()
+        {
+            double dx = pos.getX()-gen.root.getX();
+            double dz = pos.getZ()-gen.root.getZ();
+            return Math.sqrt(dx*dx+dz*dz);
+        }
+
+        public double computeDistanceFromCenter()
+        {
+            double dx = (double) pos.getX() - (double) gen.root.getX();
+            double dy = (double) pos.getY() - (double) gen.root.getY();
+            double dz = (double) pos.getZ() - (double) gen.root.getZ();
+            return Math.sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
+        public void grow()
+        {
+            findValidGrowthDirections().forEach(offshoot ->
+            {
+                if (offshoot != null && offshoot.thickness >= 0)
+                {
+                    owner.enqueueBranch(offshoot);
+                }
+            });
+        }
+
+        @Nullable
+        protected abstract T getRandomBranchForFacing(Direction newFacing);
+
+        @SuppressWarnings("unchecked")
+        protected final T getSelf()
+        {
+            return (T)this;
+        }
+
+        protected Stream<T> findValidGrowthDirections()
+        {
+            return Arrays.stream(Direction.values())
+                    .filter(d -> owner.testFacing(getSelf(), d))
+                    .map(this::getRandomBranchForFacing)
+                    .filter(Objects::nonNull);
         }
     }
 }

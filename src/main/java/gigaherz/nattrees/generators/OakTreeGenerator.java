@@ -6,9 +6,10 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
+import javax.annotation.Nullable;
 import java.util.Random;
 
-public class OakTreeGenerator extends AbstractTreeGenerator<OakBranchInfo>
+public class OakTreeGenerator extends AbstractTreeGenerator<OakTreeGenerator.OakBranchInfo>
 {
     private final float tallnessModifier;
     private final float spreadnessModifier;
@@ -43,5 +44,50 @@ public class OakTreeGenerator extends AbstractTreeGenerator<OakBranchInfo>
     protected boolean getWillHaveLeaves(OakBranchInfo info)
     {
         return info.length >= 4 && info.thickness <= 1;
+    }
+
+    public static class OakBranchInfo extends BranchInfo<OakBranchInfo>
+    {
+        protected OakBranchInfo(AbstractTreeGenerator<OakBranchInfo> owner, GenerationInfo gen, BlockPos pos, Direction facing, int thickness, int length)
+        {
+            super(owner, gen, pos, facing, thickness, length);
+        }
+
+        @Nullable
+        @Override
+        protected OakBranchInfo getRandomBranchForFacing(Direction newFacing)
+        {
+            if (this.length < this.gen.tallness() / 2 && newFacing != this.facing)
+                return null;
+
+            int min = -1;
+            int max = this.thickness + 2;
+
+            if (newFacing == Direction.DOWN)
+            {
+                min = -20;
+                max = 1;
+            }
+            else if (this.length < this.gen.tallness())
+            {
+                if (newFacing == this.facing)
+                    min = this.thickness;
+                else
+                    min = -max;
+            }
+
+            double distance = computeDistanceFromCenter();
+            max = (int) Math.min(max, Math.max(this.gen.tallness() - this.length, this.gen.spreadness() - distance) + 1);
+
+            int thick = max;
+            if (min < max)
+                thick = this.gen.rand().nextInt(max - min) + min;
+            return makeBranch(newFacing, thick);
+        }
+
+        protected OakBranchInfo makeBranch(Direction newFacing, int newThickness)
+        {
+            return new OakBranchInfo(owner, gen, pos.relative(newFacing), newFacing, newThickness, length+1);
+        }
     }
 }
